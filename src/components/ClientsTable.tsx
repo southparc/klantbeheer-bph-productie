@@ -29,8 +29,8 @@ interface Client {
   last_name: string | null;
   email: string;
   phone: string | null;
-  city: string | null;
-  country: string | null;
+  advisor_name: string | null;
+  mortgage_amount: number | null;
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -48,7 +48,15 @@ export function ClientsTable() {
 
       let query = supabase
         .from("clients")
-        .select("id, first_name, last_name, email, phone, city, country")
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          email, 
+          phone,
+          advisors(name),
+          house_objects(mortgage_amount)
+        `)
         .range(from, to);
 
       if (sortField && sortDirection) {
@@ -59,7 +67,13 @@ export function ClientsTable() {
 
       if (error) throw error;
 
-      return { clients: data || [], total: count || 0 };
+      const processedClients = (data || []).map(client => ({
+        ...client,
+        advisor_name: client.advisors?.name || null,
+        mortgage_amount: client.house_objects?.[0]?.mortgage_amount || null
+      }));
+
+      return { clients: processedClients, total: count || 0 };
     },
   });
 
@@ -141,8 +155,8 @@ export function ClientsTable() {
               </TableHead>
               <TableHead>Email Domain</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>Country</TableHead>
+              <TableHead>Advisor</TableHead>
+              <TableHead>Mortgage Amount</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -155,8 +169,13 @@ export function ClientsTable() {
                   {getEmailDomain(client.email)}
                 </TableCell>
                 <TableCell>{client.phone || "-"}</TableCell>
-                <TableCell>{client.city || "-"}</TableCell>
-                <TableCell>{client.country || "-"}</TableCell>
+                <TableCell>{client.advisor_name || "-"}</TableCell>
+                <TableCell>
+                  {client.mortgage_amount 
+                    ? `€${client.mortgage_amount.toLocaleString()}` 
+                    : "-"
+                  }
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
