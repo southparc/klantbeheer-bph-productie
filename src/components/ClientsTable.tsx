@@ -56,6 +56,7 @@ export function ClientsTable() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["clients", currentPage, sortField, sortDirection, debouncedSearch],
     queryFn: async () => {
+      console.log("Query with search term:", debouncedSearch);
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
@@ -73,6 +74,7 @@ export function ClientsTable() {
         .range(from, to);
 
       if (debouncedSearch) {
+        console.log("Applying search filter:", debouncedSearch);
         query = query.or(`first_name.ilike.%${debouncedSearch}%,last_name.ilike.%${debouncedSearch}%,email.ilike.%${debouncedSearch}%`);
       }
 
@@ -84,12 +86,18 @@ export function ClientsTable() {
 
       if (error) throw error;
 
-      const processedClients = (data || []).map(client => ({
-        ...client,
+      // Process the data to flatten nested relationships
+      const processedClients = (data || []).map((client: any) => ({
+        id: client.id,
+        first_name: client.first_name,
+        last_name: client.last_name,
+        email: client.email,
+        phone: client.phone,
         advisor_name: client.advisors?.name || null,
         mortgage_amount: client.house_objects?.[0]?.mortgage_amount || null
       }));
 
+      console.log("Processed clients:", processedClients.length, processedClients);
       return { clients: processedClients, total: count || 0 };
     },
   });
