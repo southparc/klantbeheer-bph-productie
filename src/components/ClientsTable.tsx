@@ -18,7 +18,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowUpDown, ArrowUp, ArrowDown, Search } from "lucide-react";
 
 type SortField = "first_name" | "last_name" | "email";
 type SortDirection = "asc" | "desc";
@@ -39,9 +40,10 @@ export function ClientsTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("last_name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["clients", currentPage, sortField, sortDirection],
+    queryKey: ["clients", currentPage, sortField, sortDirection, searchTerm],
     queryFn: async () => {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
@@ -58,6 +60,10 @@ export function ClientsTable() {
           house_objects(mortgage_amount)
         `)
         .range(from, to);
+
+      if (searchTerm) {
+        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
 
       if (sortField && sortDirection) {
         query = query.order(sortField, { ascending: sortDirection === "asc" });
@@ -120,6 +126,18 @@ export function ClientsTable() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Clients ({data?.total || 0})</h2>
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-10"
+          />
+        </div>
       </div>
 
       <div className="border rounded-lg">
