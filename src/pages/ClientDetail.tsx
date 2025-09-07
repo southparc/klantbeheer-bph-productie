@@ -51,7 +51,7 @@ const ClientDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [formData, setFormData] = useState<Partial<ClientData>>({});
 
   const { data: client, isLoading, error } = useQuery({
@@ -98,7 +98,7 @@ const ClientDetail = () => {
         title: "Success",
         description: "Client updated successfully",
       });
-      setIsEditing(false);
+      setHasChanges(false);
       queryClient.invalidateQueries({ queryKey: ['client', id] });
     },
     onError: (error: any) => {
@@ -111,10 +111,11 @@ const ClientDetail = () => {
   });
 
   useEffect(() => {
-    if (client && !isEditing) {
+    if (client) {
       setFormData(client);
+      setHasChanges(false);
     }
-  }, [client, isEditing]);
+  }, [client]);
 
   const handleSave = () => {
     updateMutation.mutate(formData);
@@ -125,6 +126,12 @@ const ClientDetail = () => {
       ...prev,
       [field]: value === '' ? null : value
     }));
+    setHasChanges(true);
+  };
+
+  const handleReset = () => {
+    setFormData(client);
+    setHasChanges(false);
   };
 
   if (isLoading) {
@@ -163,22 +170,20 @@ const ClientDetail = () => {
             </h1>
           </div>
           <div className="flex gap-2">
-            {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => {
-                  setIsEditing(false);
-                  setFormData(client);
-                }}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={updateMutation.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateMutation.isPending ? 'Saving...' : 'Save'}
-                </Button>
-              </>
-            )}
+            <Button 
+              variant="outline" 
+              onClick={handleReset}
+              disabled={!hasChanges || updateMutation.isPending}
+            >
+              Reset
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={!hasChanges || updateMutation.isPending}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </div>
 
@@ -203,7 +208,6 @@ const ClientDetail = () => {
                     id="first_name"
                     value={formData.first_name || ''}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -212,7 +216,6 @@ const ClientDetail = () => {
                     id="last_name"
                     value={formData.last_name || ''}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -222,7 +225,6 @@ const ClientDetail = () => {
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -231,7 +233,6 @@ const ClientDetail = () => {
                     id="phone"
                     value={formData.phone || ''}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -241,7 +242,6 @@ const ClientDetail = () => {
                     type="date"
                     value={formData.birth_date || ''}
                     onChange={(e) => handleInputChange('birth_date', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -250,7 +250,6 @@ const ClientDetail = () => {
                     id="gender"
                     value={formData.gender || ''}
                     onChange={(e) => handleInputChange('gender', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -259,7 +258,6 @@ const ClientDetail = () => {
                     id="city"
                     value={formData.city || ''}
                     onChange={(e) => handleInputChange('city', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -268,7 +266,6 @@ const ClientDetail = () => {
                     id="country"
                     value={formData.country || ''}
                     onChange={(e) => handleInputChange('country', e.target.value)}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -296,7 +293,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.gross_income || ''}
                     onChange={(e) => handleInputChange('gross_income', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -306,7 +302,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.net_monthly_income || ''}
                     onChange={(e) => handleInputChange('net_monthly_income', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -316,7 +311,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.net_monthly_spending || ''}
                     onChange={(e) => handleInputChange('net_monthly_spending', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -326,7 +320,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.saving_balance || ''}
                     onChange={(e) => handleInputChange('saving_balance', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -336,7 +329,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.investment_balance || ''}
                     onChange={(e) => handleInputChange('investment_balance', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -346,7 +338,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.pension_income || ''}
                     onChange={(e) => handleInputChange('pension_income', parseFloat(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -356,7 +347,6 @@ const ClientDetail = () => {
                     type="number"
                     value={formData.retirement_target_age || ''}
                     onChange={(e) => handleInputChange('retirement_target_age', parseInt(e.target.value))}
-                    disabled={!isEditing}
                   />
                 </div>
                 <div>
@@ -365,7 +355,7 @@ const ClientDetail = () => {
                     id="risk_profile"
                     value={formData.risk_profile || ''}
                     onChange={(e) => handleInputChange('risk_profile', e.target.value)}
-                    disabled={!isEditing}
+                    
                   />
                 </div>
               </CardContent>
