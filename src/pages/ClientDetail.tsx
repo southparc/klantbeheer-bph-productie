@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -369,12 +370,21 @@ const ClientDetail = () => {
                 </div>
                 <div>
                   <Label htmlFor="risk_profile">Risk Profile</Label>
-                  <Input
-                    id="risk_profile"
+                  <Select
                     value={formData.risk_profile || ''}
-                    onChange={(e) => handleInputChange('risk_profile', e.target.value)}
-                    
-                  />
+                    onValueChange={(value) => handleInputChange('risk_profile', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select risk profile..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Zeer defensief">Zeer defensief</SelectItem>
+                      <SelectItem value="Defensief">Defensief</SelectItem>
+                      <SelectItem value="Neutraal">Neutraal</SelectItem>
+                      <SelectItem value="Offensief">Offensief</SelectItem>
+                      <SelectItem value="Zeer offensief">Zeer offensief</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
