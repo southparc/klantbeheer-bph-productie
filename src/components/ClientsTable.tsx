@@ -50,7 +50,7 @@ export function ClientsTable() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
-    }, 300);
+    }, 500); // Increased delay to 500ms
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -75,7 +75,7 @@ export function ClientsTable() {
         `)
         .range(from, to);
 
-      if (debouncedSearch) {
+      if (debouncedSearch && debouncedSearch.length >= 2) {
         console.log("Applying search filter:", debouncedSearch);
         query = query.or(`first_name.ilike.%${debouncedSearch}%,last_name.ilike.%${debouncedSearch}%,email.ilike.%${debouncedSearch}%`);
       }
@@ -102,6 +102,8 @@ export function ClientsTable() {
       console.log("Processed clients:", processedClients.length, processedClients);
       return { clients: processedClients, total: count || 0 };
     },
+    staleTime: 30000, // Cache for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const handleSort = (field: SortField) => {
