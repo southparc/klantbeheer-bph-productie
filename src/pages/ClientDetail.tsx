@@ -391,15 +391,15 @@ const ClientDetail = () => {
                           </div>
                           <div>
                             <Label>Home Value</Label>
-                            <Input value={house.home_value ? `€${house.home_value.toLocaleString()}` : '-'} disabled />
+                            <Input value={house.home_value ? `€${house.home_value.toLocaleString('nl-NL')}` : '-'} disabled />
                           </div>
                           <div>
                             <Label>Mortgage Amount</Label>
-                            <Input value={house.mortgage_amount ? `€${house.mortgage_amount.toLocaleString()}` : '-'} disabled />
+                            <Input value={house.mortgage_amount ? `€${house.mortgage_amount.toLocaleString('nl-NL')}` : '-'} disabled />
                           </div>
                           <div>
                             <Label>Mortgage Remaining</Label>
-                            <Input value={house.mortgage_remaining ? `€${house.mortgage_remaining.toLocaleString()}` : '-'} disabled />
+                            <Input value={house.mortgage_remaining ? `€${house.mortgage_remaining.toLocaleString('nl-NL')}` : '-'} disabled />
                           </div>
                           <div>
                             <Label>Interest Rate</Label>
@@ -443,7 +443,7 @@ const ClientDetail = () => {
                           </div>
                           <div>
                             <Label>Value</Label>
-                            <Input value={insurance.value ? `€${insurance.value.toLocaleString()}` : '-'} disabled />
+                            <Input value={insurance.value ? `€${insurance.value.toLocaleString('nl-NL')}` : '-'} disabled />
                           </div>
                         </div>
                       </div>

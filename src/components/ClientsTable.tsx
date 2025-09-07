@@ -216,7 +216,7 @@ export function ClientsTable() {
                 <TableCell>{client.advisor_name || "-"}</TableCell>
                 <TableCell>
                   {client.mortgage_amount 
-                    ? `€${client.mortgage_amount.toLocaleString()}` 
+                    ? `€${client.mortgage_amount.toLocaleString('nl-NL')}` 
                     : "-"
                   }
                 </TableCell>
