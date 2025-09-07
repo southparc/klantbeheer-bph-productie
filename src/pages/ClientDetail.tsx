@@ -30,7 +30,6 @@ interface ClientData {
   retirement_target_age: number | null;
   risk_profile: string | null;
   advisor_id: number | null;
-  advisors?: { name: string } | null;
   house_objects: Array<{
     id: number;
     display_name: string | null;
@@ -74,7 +73,7 @@ const ClientDetail = () => {
     queryFn: async () => {
       if (!id) throw new Error('No client ID provided');
       
-      const { data: clientData, error: clientError } = await supabase
+      const { data, error } = await supabase
         .from('clients')
         .select(`
           *,
@@ -89,26 +88,8 @@ const ClientDetail = () => {
         .eq('id', id)
         .single();
 
-      if (clientError) throw clientError;
-      
-      // Fetch advisor separately if advisor_id exists
-      let advisorData = null;
-      if (clientData.advisor_id) {
-        const { data: advisor, error: advisorError } = await supabase
-          .from('advisors')
-          .select('name')
-          .eq('id', clientData.advisor_id)
-          .maybeSingle();
-        
-        if (!advisorError && advisor) {
-          advisorData = { name: advisor.name };
-        }
-      }
-      
-      return {
-        ...clientData,
-        advisors: advisorData
-      } as ClientData;
+      if (error) throw error;
+      return data as ClientData;
     },
     enabled: !!id
   });
@@ -307,7 +288,12 @@ const ClientDetail = () => {
                     onValueChange={(value) => handleInputChange('advisor_id', value === 'none' ? null : parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select an advisor..." />
+                      <SelectValue placeholder="Select an advisor...">
+                        {formData.advisor_id 
+                          ? advisors?.find(a => a.id === formData.advisor_id)?.name || 'Unknown advisor'
+                          : 'No advisor assigned'
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">No advisor assigned</SelectItem>
