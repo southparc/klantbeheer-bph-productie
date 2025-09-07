@@ -29,6 +29,7 @@ interface ClientData {
   pension_income: number | null;
   retirement_target_age: number | null;
   risk_profile: string | null;
+  advisor_id: number | null;
   advisors?: { name: string } | null;
   house_objects: Array<{
     id: number;
@@ -54,6 +55,19 @@ const ClientDetail = () => {
   const queryClient = useQueryClient();
   const [hasChanges, setHasChanges] = useState(false);
   const [formData, setFormData] = useState<Partial<ClientData>>({});
+
+  const { data: advisors } = useQuery({
+    queryKey: ['advisors'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('advisors')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const { data: client, isLoading, error } = useQuery({
     queryKey: ['client', id],
@@ -271,10 +285,22 @@ const ClientDetail = () => {
                 </div>
                 <div>
                   <Label>Advisor</Label>
-                  <Input
-                    value={client.advisors?.name || 'No advisor assigned'}
-                    disabled
-                  />
+                  <Select
+                    value={formData.advisor_id?.toString() || ''}
+                    onValueChange={(value) => handleInputChange('advisor_id', value ? parseInt(value) : null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an advisor..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No advisor assigned</SelectItem>
+                      {advisors?.map((advisor) => (
+                        <SelectItem key={advisor.id} value={advisor.id.toString()}>
+                          {advisor.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
