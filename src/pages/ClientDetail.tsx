@@ -286,14 +286,14 @@ const ClientDetail = () => {
                 <div>
                   <Label>Advisor</Label>
                   <Select
-                    value={formData.advisor_id?.toString() || ''}
-                    onValueChange={(value) => handleInputChange('advisor_id', value ? parseInt(value) : null)}
+                    value={formData.advisor_id?.toString() || 'none'}
+                    onValueChange={(value) => handleInputChange('advisor_id', value === 'none' ? null : parseInt(value))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select an advisor..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No advisor assigned</SelectItem>
+                      <SelectItem value="none">No advisor assigned</SelectItem>
                       {advisors?.map((advisor) => (
                         <SelectItem key={advisor.id} value={advisor.id.toString()}>
                           {advisor.name}
