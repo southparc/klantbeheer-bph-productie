@@ -63,7 +63,7 @@ const ClientDetail = () => {
         .from('clients')
         .select(`
           *,
-          advisors(name),
+          advisors!advisor_id(name),
           house_objects(*),
           insurances(*),
           investments(*),
