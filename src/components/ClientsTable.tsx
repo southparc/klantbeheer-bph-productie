@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -37,6 +38,7 @@ interface Client {
 const ITEMS_PER_PAGE = 50;
 
 export function ClientsTable() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("last_name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -197,7 +199,11 @@ export function ClientsTable() {
           </TableHeader>
           <TableBody>
             {data?.clients.map((client) => (
-              <TableRow key={client.id}>
+              <TableRow 
+                key={client.id} 
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => navigate(`/client/${client.id}`)}
+              >
                 <TableCell>{client.first_name || "-"}</TableCell>
                 <TableCell>{client.last_name || "-"}</TableCell>
                 <TableCell>{client.email}</TableCell>
