@@ -74,11 +74,10 @@ const ClientDetail = () => {
     queryFn: async () => {
       if (!id) throw new Error('No client ID provided');
       
-      const { data, error } = await supabase
+      const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select(`
           *,
-          advisors!advisor_id(name),
           house_objects(*),
           insurances(*),
           investments(*),
@@ -90,8 +89,26 @@ const ClientDetail = () => {
         .eq('id', id)
         .single();
 
-      if (error) throw error;
-      return data as ClientData;
+      if (clientError) throw clientError;
+      
+      // Fetch advisor separately if advisor_id exists
+      let advisorData = null;
+      if (clientData.advisor_id) {
+        const { data: advisor, error: advisorError } = await supabase
+          .from('advisors')
+          .select('name')
+          .eq('id', clientData.advisor_id)
+          .maybeSingle();
+        
+        if (!advisorError && advisor) {
+          advisorData = { name: advisor.name };
+        }
+      }
+      
+      return {
+        ...clientData,
+        advisors: advisorData
+      } as ClientData;
     },
     enabled: !!id
   });
