@@ -30,7 +30,7 @@ interface ClientData {
   retirement_target_age: number | null;
   risk_profile: string | null;
   advisor_id: number | null;
-  house_objects: Array<{
+  house_objects?: Array<{
     id: number;
     display_name: string | null;
     home_value: number | null;
@@ -39,7 +39,7 @@ interface ClientData {
     mortgage_interest_rate: number | null;
     energy_label: string | null;
   }>;
-  insurances: Array<{
+  insurances?: Array<{
     id: number;
     display_name: string | null;
     type: string | null;
@@ -75,16 +75,7 @@ const ClientDetail = () => {
       
       const { data, error } = await supabase
         .from('clients')
-        .select(`
-          *,
-          house_objects(*),
-          insurances(*),
-          investments(*),
-          liabilities(*),
-          partners(*),
-          pensions(*),
-          financial_goals(*)
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
