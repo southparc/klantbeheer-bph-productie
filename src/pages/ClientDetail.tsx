@@ -290,54 +290,72 @@ const ClientDetail = () => {
                   <Label htmlFor="gross_income">Gross Income</Label>
                   <Input
                     id="gross_income"
-                    type="number"
-                    value={formData.gross_income || ''}
-                    onChange={(e) => handleInputChange('gross_income', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.gross_income ? formData.gross_income.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('gross_income', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
                   <Label htmlFor="net_monthly_income">Net Monthly Income</Label>
                   <Input
                     id="net_monthly_income"
-                    type="number"
-                    value={formData.net_monthly_income || ''}
-                    onChange={(e) => handleInputChange('net_monthly_income', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.net_monthly_income ? formData.net_monthly_income.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('net_monthly_income', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
                   <Label htmlFor="net_monthly_spending">Net Monthly Spending</Label>
                   <Input
                     id="net_monthly_spending"
-                    type="number"
-                    value={formData.net_monthly_spending || ''}
-                    onChange={(e) => handleInputChange('net_monthly_spending', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.net_monthly_spending ? formData.net_monthly_spending.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('net_monthly_spending', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
                   <Label htmlFor="saving_balance">Saving Balance</Label>
                   <Input
                     id="saving_balance"
-                    type="number"
-                    value={formData.saving_balance || ''}
-                    onChange={(e) => handleInputChange('saving_balance', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.saving_balance ? formData.saving_balance.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('saving_balance', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
                   <Label htmlFor="investment_balance">Investment Balance</Label>
                   <Input
                     id="investment_balance"
-                    type="number"
-                    value={formData.investment_balance || ''}
-                    onChange={(e) => handleInputChange('investment_balance', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.investment_balance ? formData.investment_balance.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('investment_balance', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
                   <Label htmlFor="pension_income">Pension Income</Label>
                   <Input
                     id="pension_income"
-                    type="number"
-                    value={formData.pension_income || ''}
-                    onChange={(e) => handleInputChange('pension_income', parseFloat(e.target.value))}
+                    type="text"
+                    value={formData.pension_income ? formData.pension_income.toLocaleString('nl-NL') : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\./g, '');
+                      handleInputChange('pension_income', value ? parseFloat(value) : '');
+                    }}
                   />
                 </div>
                 <div>
