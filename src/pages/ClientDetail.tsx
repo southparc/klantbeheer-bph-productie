@@ -100,9 +100,17 @@ const ClientDetail = () => {
         .update(updatedData)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw new Error(`Update failed: ${error.message}`);
+      }
+      
+      if (!data) {
+        throw new Error('No rows were updated. You may not have permission to edit this client.');
+      }
+      
       return data;
     },
     onSuccess: () => {
