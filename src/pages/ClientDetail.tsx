@@ -95,23 +95,23 @@ const ClientDetail = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (updatedData: Partial<ClientData>) => {
-      const { data, error } = await supabase
-        .from('clients')
-        .update(updatedData)
-        .eq('id', id)
-        .select()
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke('update-client-data', {
+        body: {
+          clientId: id,
+          updatedData
+        }
+      });
 
       if (error) {
-        console.error('Update error:', error);
+        console.error('Edge function error:', error);
         throw new Error(`Update failed: ${error.message}`);
       }
-      
-      if (!data) {
-        throw new Error('No rows were updated. You may not have permission to edit this client.');
+
+      if (data?.error) {
+        throw new Error(data.error);
       }
       
-      return data;
+      return data?.data;
     },
     onSuccess: () => {
       toast({
