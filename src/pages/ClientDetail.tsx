@@ -77,9 +77,17 @@ const ClientDetail = () => {
         .from('clients')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      if (!data) {
+        throw new Error('Client not found. You may not have permission to view this client or the client may not exist.');
+      }
+      
       return data as ClientData;
     },
     enabled: !!id
