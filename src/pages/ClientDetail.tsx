@@ -13,14 +13,21 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ClientData {
   id: string;
+  supabase_auth_id: string | null;
   first_name: string | null;
   last_name: string | null;
   email: string;
   phone: string | null;
-  birth_date: string | null;
+  initials: string | null;
+  prefix: string | null;
   gender: string | null;
-  city: string | null;
+  birth_date: string | null;
+  age: number | null;
+  city: string | null; // Added back for compatibility
   country: string | null;
+  employment_type: string | null;
+  planning_status: string | null;
+  risk_profile: string | null;
   gross_income: number | null;
   net_monthly_income: number | null;
   net_monthly_spending: number | null;
@@ -28,23 +35,55 @@ interface ClientData {
   investment_balance: number | null;
   pension_income: number | null;
   retirement_target_age: number | null;
-  risk_profile: string | null;
-  advisor_id: number | null;
-  house_objects?: Array<{
-    id: number;
-    display_name: string | null;
-    home_value: number | null;
-    mortgage_amount: number | null;
-    mortgage_remaining: number | null;
-    mortgage_interest_rate: number | null;
-    energy_label: string | null;
-  }>;
-  insurances?: Array<{
-    id: number;
-    display_name: string | null;
-    type: string | null;
-    value: number | null;
-  }>;
+  monthly_fixed_costs: number | null;
+  monthly_variable_costs: number | null;
+  consumer_credit_amount: number | null;
+  advisor_id: number | null; // Added back for compatibility
+  
+  // House data
+  house_id: number | null;
+  is_owner_occupied: boolean | null;
+  home_value: number | null;
+  mortgage_amount: number | null;
+  mortgage_remaining: number | null;
+  mortgage_interest_rate: number | null;
+  annuity_amount: number | null;
+  annuity_target_amount: number | null;
+  energy_label: string | null;
+  current_rent: number | null;
+  
+  // Contract data
+  contract_id: number | null;
+  dvo: number | null;
+  max_loan: number | null;
+  is_damage_client: boolean | null;
+  
+  // Insurance data
+  insurance_id: number | null;
+  disability_percentage: number | null;
+  death_risk_assurance_amount: number | null;
+  insurance_premiums_total: number | null;
+  
+  // Financial goals
+  financial_goal_id: number | null;
+  financial_goal_description: string | null;
+  financial_goal_amount: number | null;
+  goal_priority: string | null;
+  
+  // Liabilities
+  liability_id: number | null;
+  liability_total_amount: number | null;
+  
+  // Investments
+  investment_id: number | null;
+  investment_current_value: number | null;
+  
+  // Advisor
+  advisor_name: string | null;
+  advisor_email: string | null;
+  
+  // Partner
+  partner_gross_income: number | null;
 }
 
 const ClientDetail = () => {
@@ -73,22 +112,36 @@ const ClientDetail = () => {
     queryFn: async () => {
       if (!id) throw new Error('No client ID provided');
       
-      const { data, error } = await supabase
+      // First get the basic client info to get the email
+      const { data: basicClient, error: basicError } = await supabase
         .from('clients')
-        .select('*')
+        .select('email')
         .eq('id', id)
         .maybeSingle();
-
-      if (error) {
-        console.error('Database error:', error);
-        throw new Error(`Database error: ${error.message}`);
+      
+      if (basicError) {
+        console.error('Database error:', basicError);
+        throw new Error(`Database error: ${basicError.message}`);
       }
       
-      if (!data) {
+      if (!basicClient) {
         throw new Error('Client not found. You may not have permission to view this client or the client may not exist.');
       }
       
-      return data as ClientData;
+      // Now use the full_client_v2 function to get comprehensive data
+      const { data, error } = await supabase
+        .rpc('full_client_v2', { email: basicClient.email });
+
+      if (error) {
+        console.error('Full client function error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      if (!data || data.length === 0) {
+        throw new Error('Client data not found.');
+      }
+      
+      return data[0] as ClientData;
     },
     enabled: !!id
   });
@@ -208,11 +261,13 @@ const ClientDetail = () => {
         </div>
 
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="personal">Personal Info</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="financial">Financial</TabsTrigger>
             <TabsTrigger value="property">Property</TabsTrigger>
             <TabsTrigger value="insurance">Insurance</TabsTrigger>
+            <TabsTrigger value="goals">Goals</TabsTrigger>
+            <TabsTrigger value="advisor">Advisor</TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal">
@@ -433,39 +488,44 @@ const ClientDetail = () => {
                 <CardDescription>House and mortgage details</CardDescription>
               </CardHeader>
               <CardContent>
-                {client.house_objects && client.house_objects.length > 0 ? (
-                  <div className="space-y-4">
-                    {client.house_objects.map((house, index) => (
-                      <div key={house.id} className="border rounded-lg p-4">
-                        <h4 className="font-semibold mb-2">Property {index + 1}</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Name</Label>
-                            <Input value={house.display_name || '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Home Value</Label>
-                            <Input value={house.home_value ? `€${house.home_value.toLocaleString('nl-NL')}` : '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Mortgage Amount</Label>
-                            <Input value={house.mortgage_amount ? `€${house.mortgage_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Mortgage Remaining</Label>
-                            <Input value={house.mortgage_remaining ? `€${house.mortgage_remaining.toLocaleString('nl-NL')}` : '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Interest Rate</Label>
-                            <Input value={house.mortgage_interest_rate ? `${house.mortgage_interest_rate}%` : '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Energy Label</Label>
-                            <Input value={house.energy_label || '-'} disabled />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {client.house_id ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Owner Occupied</Label>
+                      <Input value={client.is_owner_occupied ? 'Yes' : 'No'} disabled />
+                    </div>
+                    <div>
+                      <Label>Home Value</Label>
+                      <Input value={client.home_value ? `€${client.home_value.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Mortgage Amount</Label>
+                      <Input value={client.mortgage_amount ? `€${client.mortgage_amount.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Mortgage Remaining</Label>
+                      <Input value={client.mortgage_remaining ? `€${client.mortgage_remaining.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Interest Rate</Label>
+                      <Input value={client.mortgage_interest_rate ? `${client.mortgage_interest_rate}%` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Annuity Amount</Label>
+                      <Input value={client.annuity_amount ? `€${client.annuity_amount.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Annuity Target</Label>
+                      <Input value={client.annuity_target_amount ? `€${client.annuity_target_amount.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Energy Label</Label>
+                      <Input value={client.energy_label || '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Current Rent</Label>
+                      <Input value={client.current_rent ? `€${client.current_rent.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
                   </div>
                 ) : (
                   <p className="text-muted-foreground">No property information available</p>
@@ -481,30 +541,142 @@ const ClientDetail = () => {
                 <CardDescription>Insurance policies and coverage</CardDescription>
               </CardHeader>
               <CardContent>
-                {client.insurances && client.insurances.length > 0 ? (
-                  <div className="space-y-4">
-                    {client.insurances.map((insurance, index) => (
-                      <div key={insurance.id} className="border rounded-lg p-4">
-                        <h4 className="font-semibold mb-2">Insurance {index + 1}</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Name</Label>
-                            <Input value={insurance.display_name || '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Type</Label>
-                            <Input value={insurance.type || '-'} disabled />
-                          </div>
-                          <div>
-                            <Label>Value</Label>
-                            <Input value={insurance.value ? `€${insurance.value.toLocaleString('nl-NL')}` : '-'} disabled />
-                          </div>
-                        </div>
+                {client.insurance_id ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Disability Percentage</Label>
+                      <Input value={client.disability_percentage ? `${client.disability_percentage}%` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Death Risk Assurance</Label>
+                      <Input value={client.death_risk_assurance_amount ? `€${client.death_risk_assurance_amount.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Total Insurance Premiums</Label>
+                      <Input value={client.insurance_premiums_total ? `€${client.insurance_premiums_total.toLocaleString('nl-NL')}` : '-'} disabled />
+                    </div>
+                    <div>
+                      <Label>Is Damage Client</Label>
+                      <Input value={client.is_damage_client ? 'Yes' : 'No'} disabled />
+                    </div>
+                    {client.dvo && (
+                      <div>
+                        <Label>DVO</Label>
+                        <Input value={`€${client.dvo.toLocaleString('nl-NL')}`} disabled />
                       </div>
-                    ))}
+                    )}
+                    {client.max_loan && (
+                      <div>
+                        <Label>Max Loan</Label>
+                        <Input value={`€${client.max_loan.toLocaleString('nl-NL')}`} disabled />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-muted-foreground">No insurance information available</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="goals">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Goals & Investments</CardTitle>
+                <CardDescription>Goals, investments, and liabilities</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Financial Goals */}
+                {client.financial_goal_id && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Financial Goals</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Goal Description</Label>
+                        <Input value={client.financial_goal_description || '-'} disabled />
+                      </div>
+                      <div>
+                        <Label>Goal Amount</Label>
+                        <Input value={client.financial_goal_amount ? `€${client.financial_goal_amount.toLocaleString('nl-NL')}` : '-'} disabled />
+                      </div>
+                      <div>
+                        <Label>Priority</Label>
+                        <Input value={client.goal_priority || '-'} disabled />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Investments */}
+                {client.investment_current_value && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Investments</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label>Total Investment Value</Label>
+                        <Input value={`€${client.investment_current_value.toLocaleString('nl-NL')}`} disabled />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Liabilities */}
+                {client.liability_total_amount && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Liabilities</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label>Total Liabilities</Label>
+                        <Input value={`€${client.liability_total_amount.toLocaleString('nl-NL')}`} disabled />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!client.financial_goal_id && !client.investment_current_value && !client.liability_total_amount && (
+                  <p className="text-muted-foreground">No financial goals, investments, or liabilities information available</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="advisor">
+            <Card>
+              <CardHeader>
+                <CardTitle>Advisor & Partner Information</CardTitle>
+                <CardDescription>Assigned advisor and partner details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Advisor Info */}
+                <div>
+                  <h4 className="font-semibold mb-3">Assigned Advisor</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Advisor Name</Label>
+                      <Input value={client.advisor_name || 'No advisor assigned'} disabled />
+                    </div>
+                    <div>
+                      <Label>Advisor Email</Label>
+                      <Input value={client.advisor_email || '-'} disabled />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partner Info */}
+                {client.partner_gross_income && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Partner Information</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label>Partner Gross Income</Label>
+                        <Input value={`€${client.partner_gross_income.toLocaleString('nl-NL')}`} disabled />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!client.advisor_name && !client.partner_gross_income && (
+                  <p className="text-muted-foreground">No advisor or partner information available</p>
                 )}
               </CardContent>
             </Card>
