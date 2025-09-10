@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClientsTable } from "@/components/ClientsTable";
 import { AdminLogin } from "@/components/AdminLogin";
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +48,10 @@ const Index = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Client Management</h1>
           <div className="flex items-center gap-4">
+            <Button onClick={() => navigate('/add-client')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
             <span className="text-sm text-muted-foreground">
               Logged in as: {user.email}
             </span>
