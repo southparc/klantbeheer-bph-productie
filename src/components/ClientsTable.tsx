@@ -135,7 +135,7 @@ export function ClientsTable() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading clients...</div>
+        <div className="text-muted-foreground">Klanten laden...</div>
       </div>
     );
   }
@@ -143,7 +143,7 @@ export function ClientsTable() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-destructive">Error loading clients</div>
+        <div className="text-destructive">Fout bij laden klanten</div>
       </div>
     );
   }
@@ -151,11 +151,11 @@ export function ClientsTable() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Clients ({data?.total || 0})</h2>
+        <h2 className="text-xl font-bold">Klanten ({data?.total || 0})</h2>
         <div className="relative w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or email..."
+            placeholder="Zoek op naam of email..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -175,7 +175,7 @@ export function ClientsTable() {
                   onClick={() => handleSort("first_name")}
                   className="h-auto p-0 font-medium text-xs"
                 >
-                  First Name {getSortIcon("first_name")}
+                  Voornaam {getSortIcon("first_name")}
                 </Button>
               </TableHead>
               <TableHead className="h-10 py-2">
@@ -184,7 +184,7 @@ export function ClientsTable() {
                   onClick={() => handleSort("last_name")}
                   className="h-auto p-0 font-medium text-xs"
                 >
-                  Last Name {getSortIcon("last_name")}
+                  Achternaam {getSortIcon("last_name")}
                 </Button>
               </TableHead>
               <TableHead className="h-10 py-2">
@@ -202,7 +202,7 @@ export function ClientsTable() {
                   onClick={() => handleSort("gender")}
                   className="h-auto p-0 font-medium text-xs"
                 >
-                  Gender {getSortIcon("gender")}
+                  Geslacht {getSortIcon("gender")}
                 </Button>
               </TableHead>
               <TableHead className="h-10 py-2">
@@ -211,12 +211,12 @@ export function ClientsTable() {
                   onClick={() => handleSort("age")}
                   className="h-auto p-0 font-medium text-xs"
                 >
-                  Age {getSortIcon("age")}
+                  Leeftijd {getSortIcon("age")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2 text-xs">Phone</TableHead>
-              <TableHead className="h-10 py-2 text-xs">Advisor</TableHead>
-              <TableHead className="h-10 py-2 text-xs">Mortgage</TableHead>
+              <TableHead className="h-10 py-2 text-xs">Telefoon</TableHead>
+              <TableHead className="h-10 py-2 text-xs">Adviseur</TableHead>
+              <TableHead className="h-10 py-2 text-xs">Hypotheek</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

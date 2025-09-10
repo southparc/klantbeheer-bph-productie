@@ -22,7 +22,7 @@ export default function AddClient() {
     advisor_id: "",
     company: "",
     city: "",
-    country: "Netherlands",
+    country: "Nederland",
     risk_profile: "",
     gross_income: "",
   });
@@ -50,8 +50,8 @@ export default function AddClient() {
     
     if (!formData.first_name || !formData.last_name || !formData.email) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields (First Name, Last Name, Email)",
+        title: "Validatiefout",
+        description: "Vul alle verplichte velden in (Voornaam, Achternaam, Email)",
         variant: "destructive",
       });
       return;
@@ -63,7 +63,7 @@ export default function AddClient() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error("Gebruiker niet geauthenticeerd");
       }
 
       const clientData = {
@@ -89,16 +89,16 @@ export default function AddClient() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Client has been created successfully!",
+        title: "Gelukt",
+        description: "Klant is succesvol aangemaakt!",
       });
 
       navigate(`/client/${data.id}`);
     } catch (error: any) {
       console.error("Error creating client:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to create client",
+        title: "Fout",
+        description: error.message || "Kon klant niet aanmaken",
         variant: "destructive",
       });
     } finally {
@@ -112,7 +112,7 @@ export default function AddClient() {
         <div className="flex items-center gap-4 mb-6">
           <Button variant="outline" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Clients
+            Terug naar Klanten
           </Button>
         </div>
 
@@ -120,32 +120,32 @@ export default function AddClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add New Client
+              Nieuwe Klant Toevoegen
             </CardTitle>
             <CardDescription>
-              Fill in the client information below. Required fields are marked with *.
+              Vul de klantgegevens hieronder in. Verplichte velden zijn gemarkeerd met *.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name">First Name *</Label>
+                  <Label htmlFor="first_name">Voornaam *</Label>
                   <Input
                     id="first_name"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange("first_name", e.target.value)}
-                    placeholder="Enter first name"
+                    placeholder="Voer voornaam in"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name">Last Name *</Label>
+                  <Label htmlFor="last_name">Achternaam *</Label>
                   <Input
                     id="last_name"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange("last_name", e.target.value)}
-                    placeholder="Enter last name"
+                    placeholder="Voer achternaam in"
                     required
                   />
                 </div>
@@ -158,44 +158,44 @@ export default function AddClient() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="Enter email address"
+                  placeholder="Voer emailadres in"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Telefoon</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="Enter phone number"
+                    placeholder="Voer telefoonnummer in"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company">Bedrijf</Label>
                   <Input
                     id="company"
                     value={formData.company}
                     onChange={(e) => handleInputChange("company", e.target.value)}
-                    placeholder="Enter company name"
+                    placeholder="Voer bedrijfsnaam in"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="advisor">Advisor</Label>
+                <Label htmlFor="advisor">Adviseur</Label>
                 <Select
                   value={formData.advisor_id}
                   onValueChange={(value) => handleInputChange("advisor_id", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an advisor" />
+                    <SelectValue placeholder="Selecteer een adviseur" />
                   </SelectTrigger>
                   <SelectContent>
                     {advisorsLoading ? (
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">Loading advisors...</div>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">Adviseurs laden...</div>
                     ) : (
                       advisors?.map((advisor) => (
                         <SelectItem key={advisor.id} value={advisor.id.toString()}>
@@ -209,34 +209,34 @@ export default function AddClient() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">Stad</Label>
                   <Input
                     id="city"
                     value={formData.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
-                    placeholder="Enter city"
+                    placeholder="Voer stad in"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country">Land</Label>
                   <Input
                     id="country"
                     value={formData.country}
                     onChange={(e) => handleInputChange("country", e.target.value)}
-                    placeholder="Enter country"
+                    placeholder="Voer land in"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="risk_profile">Risk Profile</Label>
+                  <Label htmlFor="risk_profile">Risicoprofiel</Label>
                   <Select
                     value={formData.risk_profile}
                     onValueChange={(value) => handleInputChange("risk_profile", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select risk profile" />
+                      <SelectValue placeholder="Selecteer risicoprofiel" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="conservatief">Conservatief</SelectItem>
@@ -247,24 +247,24 @@ export default function AddClient() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gross_income">Gross Income (€)</Label>
+                  <Label htmlFor="gross_income">Bruto Inkomen (€)</Label>
                   <Input
                     id="gross_income"
                     type="number"
                     step="0.01"
                     value={formData.gross_income}
                     onChange={(e) => handleInputChange("gross_income", e.target.value)}
-                    placeholder="Enter gross income"
+                    placeholder="Voer bruto inkomen in"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => navigate("/")}>
-                  Cancel
+                  Annuleren
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating..." : "Create Client"}
+                  {isSubmitting ? "Aanmaken..." : "Klant Aanmaken"}
                 </Button>
               </div>
             </form>
