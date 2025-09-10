@@ -130,7 +130,7 @@ const ClientDetail = () => {
       
       // Now use the full_client_v2 function to get comprehensive data
       const { data, error } = await supabase
-        .rpc('full_client_v2', { email: basicClient.email });
+        .rpc('full_client_v2', { p_email: basicClient.email });
 
       if (error) {
         console.error('Full client function error:', error);
