@@ -50,7 +50,7 @@ export function ClientsTable() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setCurrentPage(1);
-    }, 500); // Increased delay to 500ms
+    }, 1000); // Debounce delay to 1000ms
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
