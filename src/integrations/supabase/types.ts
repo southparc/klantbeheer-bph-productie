@@ -932,7 +932,7 @@ export type Database = {
         }[]
       }
       full_client_v2: {
-        Args: { email: string }
+        Args: { p_email: string }
         Returns: {
           advisor_email: string
           advisor_name: string
