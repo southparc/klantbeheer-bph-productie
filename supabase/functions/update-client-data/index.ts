@@ -32,17 +32,30 @@ serve(async (req) => {
       );
     }
 
-    // Create regular client to verify user authentication
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const regularClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: { Authorization: authHeader }
-      }
-    });
+    // Extract JWT token from authorization header
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authorization format' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Verify user is authenticated and get their info
-    const { data: { user }, error: authError } = await regularClient.auth.getUser();
+    // Create service role client for database access
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
+    if (!serviceRoleKey) {
+      console.error('SERVICE_ROLE_KEY not configured');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Verify JWT token and get user info
+    const { data: { user }, error: authError } = await serviceClient.auth.getUser(token);
     if (authError || !user) {
       console.error('Authentication error:', authError);
       return new Response(
