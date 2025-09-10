@@ -194,7 +194,7 @@ const ClientDetail = () => {
     updateMutation.mutate(formData);
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value === '' ? null : value
@@ -488,48 +488,127 @@ const ClientDetail = () => {
                 <CardDescription>House and mortgage details</CardDescription>
               </CardHeader>
               <CardContent>
-                {client.house_id ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Owner Occupied</Label>
-                      <Input value={client.is_owner_occupied ? 'Yes' : 'No'} disabled />
-                    </div>
-                    <div>
-                      <Label>Home Value</Label>
-                      <Input value={client.home_value ? `€${client.home_value.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Mortgage Amount</Label>
-                      <Input value={client.mortgage_amount ? `€${client.mortgage_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Mortgage Remaining</Label>
-                      <Input value={client.mortgage_remaining ? `€${client.mortgage_remaining.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Interest Rate</Label>
-                      <Input value={client.mortgage_interest_rate ? `${client.mortgage_interest_rate}%` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Annuity Amount</Label>
-                      <Input value={client.annuity_amount ? `€${client.annuity_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Annuity Target</Label>
-                      <Input value={client.annuity_target_amount ? `€${client.annuity_target_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Energy Label</Label>
-                      <Input value={client.energy_label || '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Current Rent</Label>
-                      <Input value={client.current_rent ? `€${client.current_rent.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="is_owner_occupied">Owner Occupied</Label>
+                    <Select
+                      value={formData.is_owner_occupied ? 'true' : 'false'}
+                      onValueChange={(value) => handleInputChange('is_owner_occupied', value === 'true' ? true : false)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Yes</SelectItem>
+                        <SelectItem value="false">No</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground">No property information available</p>
-                )}
+                  <div>
+                    <Label htmlFor="home_value">Home Value</Label>
+                    <Input
+                      id="home_value"
+                      type="text"
+                      value={formData.home_value ? formData.home_value.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('home_value', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mortgage_amount">Mortgage Amount</Label>
+                    <Input
+                      id="mortgage_amount"
+                      type="text"
+                      value={formData.mortgage_amount ? formData.mortgage_amount.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('mortgage_amount', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mortgage_remaining">Mortgage Remaining</Label>
+                    <Input
+                      id="mortgage_remaining"
+                      type="text"
+                      value={formData.mortgage_remaining ? formData.mortgage_remaining.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('mortgage_remaining', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mortgage_interest_rate">Interest Rate (%)</Label>
+                    <Input
+                      id="mortgage_interest_rate"
+                      type="number"
+                      step="0.01"
+                      value={formData.mortgage_interest_rate || ''}
+                      onChange={(e) => handleInputChange('mortgage_interest_rate', parseFloat(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="annuity_amount">Annuity Amount</Label>
+                    <Input
+                      id="annuity_amount"
+                      type="text"
+                      value={formData.annuity_amount ? formData.annuity_amount.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('annuity_amount', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="annuity_target_amount">Annuity Target</Label>
+                    <Input
+                      id="annuity_target_amount"
+                      type="text"
+                      value={formData.annuity_target_amount ? formData.annuity_target_amount.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('annuity_target_amount', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="energy_label">Energy Label</Label>
+                    <Select
+                      value={formData.energy_label || ''}
+                      onValueChange={(value) => handleInputChange('energy_label', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select energy label..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A++">A++</SelectItem>
+                        <SelectItem value="A+">A+</SelectItem>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                        <SelectItem value="D">D</SelectItem>
+                        <SelectItem value="E">E</SelectItem>
+                        <SelectItem value="F">F</SelectItem>
+                        <SelectItem value="G">G</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="current_rent">Current Rent</Label>
+                    <Input
+                      id="current_rent"
+                      type="text"
+                      value={formData.current_rent ? formData.current_rent.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('current_rent', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -541,40 +620,82 @@ const ClientDetail = () => {
                 <CardDescription>Insurance policies and coverage</CardDescription>
               </CardHeader>
               <CardContent>
-                {client.insurance_id ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Disability Percentage</Label>
-                      <Input value={client.disability_percentage ? `${client.disability_percentage}%` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Death Risk Assurance</Label>
-                      <Input value={client.death_risk_assurance_amount ? `€${client.death_risk_assurance_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Total Insurance Premiums</Label>
-                      <Input value={client.insurance_premiums_total ? `€${client.insurance_premiums_total.toLocaleString('nl-NL')}` : '-'} disabled />
-                    </div>
-                    <div>
-                      <Label>Is Damage Client</Label>
-                      <Input value={client.is_damage_client ? 'Yes' : 'No'} disabled />
-                    </div>
-                    {client.dvo && (
-                      <div>
-                        <Label>DVO</Label>
-                        <Input value={`€${client.dvo.toLocaleString('nl-NL')}`} disabled />
-                      </div>
-                    )}
-                    {client.max_loan && (
-                      <div>
-                        <Label>Max Loan</Label>
-                        <Input value={`€${client.max_loan.toLocaleString('nl-NL')}`} disabled />
-                      </div>
-                    )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="disability_percentage">Disability Percentage (%)</Label>
+                    <Input
+                      id="disability_percentage"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.disability_percentage || ''}
+                      onChange={(e) => handleInputChange('disability_percentage', parseInt(e.target.value))}
+                    />
                   </div>
-                ) : (
-                  <p className="text-muted-foreground">No insurance information available</p>
-                )}
+                  <div>
+                    <Label htmlFor="death_risk_assurance_amount">Death Risk Assurance</Label>
+                    <Input
+                      id="death_risk_assurance_amount"
+                      type="text"
+                      value={formData.death_risk_assurance_amount ? formData.death_risk_assurance_amount.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('death_risk_assurance_amount', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="insurance_premiums_total">Total Insurance Premiums</Label>
+                    <Input
+                      id="insurance_premiums_total"
+                      type="text"
+                      value={formData.insurance_premiums_total ? formData.insurance_premiums_total.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('insurance_premiums_total', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="is_damage_client">Is Damage Client</Label>
+                    <Select
+                      value={formData.is_damage_client ? 'true' : 'false'}
+                      onValueChange={(value) => handleInputChange('is_damage_client', value === 'true' ? true : false)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Yes</SelectItem>
+                        <SelectItem value="false">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="dvo">DVO</Label>
+                    <Input
+                      id="dvo"
+                      type="text"
+                      value={formData.dvo ? formData.dvo.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('dvo', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max_loan">Max Loan</Label>
+                    <Input
+                      id="max_loan"
+                      type="text"
+                      value={formData.max_loan ? formData.max_loan.toLocaleString('nl-NL') : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        handleInputChange('max_loan', value ? parseFloat(value) : '');
+                      }}
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -587,55 +708,86 @@ const ClientDetail = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Financial Goals */}
-                {client.financial_goal_id && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Financial Goals</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Goal Description</Label>
-                        <Input value={client.financial_goal_description || '-'} disabled />
-                      </div>
-                      <div>
-                        <Label>Goal Amount</Label>
-                        <Input value={client.financial_goal_amount ? `€${client.financial_goal_amount.toLocaleString('nl-NL')}` : '-'} disabled />
-                      </div>
-                      <div>
-                        <Label>Priority</Label>
-                        <Input value={client.goal_priority || '-'} disabled />
-                      </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Financial Goals</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="financial_goal_description">Goal Description</Label>
+                      <Input
+                        id="financial_goal_description"
+                        type="text"
+                        value={formData.financial_goal_description || ''}
+                        onChange={(e) => handleInputChange('financial_goal_description', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="financial_goal_amount">Goal Amount</Label>
+                      <Input
+                        id="financial_goal_amount"
+                        type="text"
+                        value={formData.financial_goal_amount ? formData.financial_goal_amount.toLocaleString('nl-NL') : ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          handleInputChange('financial_goal_amount', value ? parseFloat(value) : '');
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="goal_priority">Priority</Label>
+                      <Select
+                        value={formData.goal_priority || ''}
+                        onValueChange={(value) => handleInputChange('goal_priority', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select priority..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Hoog">Hoog</SelectItem>
+                          <SelectItem value="Gemiddeld">Gemiddeld</SelectItem>
+                          <SelectItem value="Laag">Laag</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Investments */}
-                {client.investment_current_value && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Investments</h4>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <Label>Total Investment Value</Label>
-                        <Input value={`€${client.investment_current_value.toLocaleString('nl-NL')}`} disabled />
-                      </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Investments</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="investment_current_value">Total Investment Value</Label>
+                      <Input
+                        id="investment_current_value"
+                        type="text"
+                        value={formData.investment_current_value ? formData.investment_current_value.toLocaleString('nl-NL') : ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          handleInputChange('investment_current_value', value ? parseFloat(value) : '');
+                        }}
+                      />
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Liabilities */}
-                {client.liability_total_amount && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Liabilities</h4>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <Label>Total Liabilities</Label>
-                        <Input value={`€${client.liability_total_amount.toLocaleString('nl-NL')}`} disabled />
-                      </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Liabilities</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="liability_total_amount">Total Liabilities</Label>
+                      <Input
+                        id="liability_total_amount"
+                        type="text"
+                        value={formData.liability_total_amount ? formData.liability_total_amount.toLocaleString('nl-NL') : ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          handleInputChange('liability_total_amount', value ? parseFloat(value) : '');
+                        }}
+                      />
                     </div>
                   </div>
-                )}
-
-                {!client.financial_goal_id && !client.investment_current_value && !client.liability_total_amount && (
-                  <p className="text-muted-foreground">No financial goals, investments, or liabilities information available</p>
-                )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -652,32 +804,45 @@ const ClientDetail = () => {
                   <h4 className="font-semibold mb-3">Assigned Advisor</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Advisor Name</Label>
-                      <Input value={client.advisor_name || 'No advisor assigned'} disabled />
+                      <Label htmlFor="advisor_name">Advisor Name</Label>
+                      <Input
+                        id="advisor_name"
+                        type="text"
+                        value={formData.advisor_name || ''}
+                        onChange={(e) => handleInputChange('advisor_name', e.target.value)}
+                        placeholder="No advisor assigned"
+                      />
                     </div>
                     <div>
-                      <Label>Advisor Email</Label>
-                      <Input value={client.advisor_email || '-'} disabled />
+                      <Label htmlFor="advisor_email">Advisor Email</Label>
+                      <Input
+                        id="advisor_email"
+                        type="email"
+                        value={formData.advisor_email || ''}
+                        onChange={(e) => handleInputChange('advisor_email', e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Partner Info */}
-                {client.partner_gross_income && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Partner Information</h4>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <Label>Partner Gross Income</Label>
-                        <Input value={`€${client.partner_gross_income.toLocaleString('nl-NL')}`} disabled />
-                      </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Partner Information</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="partner_gross_income">Partner Gross Income</Label>
+                      <Input
+                        id="partner_gross_income"
+                        type="text"
+                        value={formData.partner_gross_income ? formData.partner_gross_income.toLocaleString('nl-NL') : ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          handleInputChange('partner_gross_income', value ? parseFloat(value) : '');
+                        }}
+                      />
                     </div>
                   </div>
-                )}
-
-                {!client.advisor_name && !client.partner_gross_income && (
-                  <p className="text-muted-foreground">No advisor or partner information available</p>
-                )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
