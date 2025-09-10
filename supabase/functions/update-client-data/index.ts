@@ -107,10 +107,48 @@ serve(async (req) => {
 
     console.log('Permission granted for user:', user.id, 'to update client:', clientId);
 
+    // Filter updatedData to only include fields that exist in the clients table
+    // Exclude computed/virtual fields from the full_client_v2 function
+    const {
+      // Remove computed fields that don't exist in clients table
+      advisor_name,
+      advisor_email,
+      partner_gross_income,
+      house_id,
+      is_owner_occupied,
+      home_value,
+      mortgage_amount,
+      mortgage_remaining,
+      mortgage_interest_rate,
+      annuity_amount,
+      annuity_target_amount,
+      energy_label,
+      current_rent,
+      contract_id,
+      dvo,
+      max_loan,
+      is_damage_client,
+      insurance_id,
+      disability_percentage,
+      death_risk_assurance_amount,
+      insurance_premiums_total,
+      financial_goal_id,
+      financial_goal_description,
+      financial_goal_amount,
+      goal_priority,
+      liability_id,
+      liability_total_amount,
+      investment_id,
+      investment_current_value,
+      ...clientFields
+    } = updatedData;
+
+    console.log('Filtered client fields for update:', Object.keys(clientFields));
+
     // Perform the update with service role client (bypasses RLS)
     const { data: updateResult, error: updateError } = await serviceClient
       .from('clients')
-      .update(updatedData)
+      .update(clientFields)
       .eq('id', clientId)
       .select()
       .single();
