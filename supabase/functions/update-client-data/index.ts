@@ -66,13 +66,14 @@ serve(async (req) => {
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Check if user has permission to update this client
-    // For now, we'll check if the user is an admin or if they're associated with this client
-    const { data: userRoles, error: roleError } = await serviceClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
+    // Check if user is an admin by looking at admin_users table
+    const { data: adminUser, error: adminError } = await serviceClient
+      .from('admin_users')
+      .select('is_active')
+      .eq('email', user.email)
+      .maybeSingle();
 
-    const isAdmin = userRoles?.some(role => role.role === 'admin');
+    const isAdmin = adminUser && adminUser.is_active;
 
     // Also check if user is the client's assigned advisor or the client themselves
     const { data: clientData, error: clientError } = await serviceClient
