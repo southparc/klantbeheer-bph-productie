@@ -195,7 +195,7 @@ export default function AddClient() {
                   </SelectTrigger>
                   <SelectContent>
                     {advisorsLoading ? (
-                      <SelectItem value="" disabled>Loading advisors...</SelectItem>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">Loading advisors...</div>
                     ) : (
                       advisors?.map((advisor) => (
                         <SelectItem key={advisor.id} value={advisor.id.toString()}>
