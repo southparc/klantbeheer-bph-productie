@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminLogin } from '@/components/AdminLogin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -93,6 +94,24 @@ const ClientDetail = () => {
   const queryClient = useQueryClient();
   const [hasChanges, setHasChanges] = useState(false);
   const [formData, setFormData] = useState<Partial<ClientData>>({});
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Check authentication status
+  useEffect(() => {
+    // Check current auth status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: advisors } = useQuery({
     queryKey: ['advisors'],
@@ -206,6 +225,18 @@ const ClientDetail = () => {
     setFormData(client);
     setHasChanges(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AdminLogin onLoginSuccess={() => {}} />;
+  }
 
   if (isLoading) {
     return (
