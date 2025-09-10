@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown, ArrowUp, ArrowDown, Search } from "lucide-react";
 
-type SortField = "first_name" | "last_name" | "email";
+type SortField = "first_name" | "last_name" | "email" | "gender" | "age";
 type SortDirection = "asc" | "desc";
 
 interface Client {
@@ -31,11 +31,13 @@ interface Client {
   last_name: string | null;
   email: string;
   phone: string | null;
+  gender: string | null;
+  age: number | null;
   advisor_name: string | null;
   mortgage_amount: number | null;
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 100;
 
 export function ClientsTable() {
   const navigate = useNavigate();
@@ -70,6 +72,8 @@ export function ClientsTable() {
           last_name, 
           email, 
           phone,
+          gender,
+          age,
           advisors(name),
           house_objects(mortgage_amount)
         `)
@@ -95,6 +99,8 @@ export function ClientsTable() {
         last_name: client.last_name,
         email: client.email,
         phone: client.phone,
+        gender: client.gender,
+        age: client.age,
         advisor_name: client.advisors?.name || null,
         mortgage_amount: client.house_objects?.[0]?.mortgage_amount || null
       }));
@@ -125,9 +131,6 @@ export function ClientsTable() {
 
   const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 0;
 
-  const getEmailDomain = (email: string) => {
-    return email.split("@")[1] || "";
-  };
 
   if (isLoading) {
     return (
@@ -146,18 +149,18 @@ export function ClientsTable() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Clients ({data?.total || 0})</h2>
-        <div className="relative w-72">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <h2 className="text-xl font-bold">Clients ({data?.total || 0})</h2>
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
             }}
-            className="pl-10"
+            className="pl-8 h-9 text-sm"
           />
         </div>
       </div>
@@ -165,56 +168,72 @@ export function ClientsTable() {
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>
+            <TableRow className="h-10">
+              <TableHead className="h-10 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("first_name")}
-                  className="h-auto p-0 font-medium"
+                  className="h-auto p-0 font-medium text-xs"
                 >
                   First Name {getSortIcon("first_name")}
                 </Button>
               </TableHead>
-              <TableHead>
+              <TableHead className="h-10 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("last_name")}
-                  className="h-auto p-0 font-medium"
+                  className="h-auto p-0 font-medium text-xs"
                 >
                   Last Name {getSortIcon("last_name")}
                 </Button>
               </TableHead>
-              <TableHead>
+              <TableHead className="h-10 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("email")}
-                  className="h-auto p-0 font-medium"
+                  className="h-auto p-0 font-medium text-xs"
                 >
                   Email {getSortIcon("email")}
                 </Button>
               </TableHead>
-              <TableHead>Email Domain</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Advisor</TableHead>
-              <TableHead>Mortgage Amount</TableHead>
+              <TableHead className="h-10 py-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("gender")}
+                  className="h-auto p-0 font-medium text-xs"
+                >
+                  Gender {getSortIcon("gender")}
+                </Button>
+              </TableHead>
+              <TableHead className="h-10 py-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("age")}
+                  className="h-auto p-0 font-medium text-xs"
+                >
+                  Age {getSortIcon("age")}
+                </Button>
+              </TableHead>
+              <TableHead className="h-10 py-2 text-xs">Phone</TableHead>
+              <TableHead className="h-10 py-2 text-xs">Advisor</TableHead>
+              <TableHead className="h-10 py-2 text-xs">Mortgage</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data?.clients.map((client) => (
               <TableRow 
                 key={client.id} 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 h-8"
                 onClick={() => navigate(`/client/${client.id}`)}
               >
-                <TableCell>{client.first_name || "-"}</TableCell>
-                <TableCell>{client.last_name || "-"}</TableCell>
-                <TableCell>{client.email}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {getEmailDomain(client.email)}
-                </TableCell>
-                <TableCell>{client.phone || "-"}</TableCell>
-                <TableCell>{client.advisor_name || "-"}</TableCell>
-                <TableCell>
+                <TableCell className="py-1 text-sm">{client.first_name || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">{client.last_name || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">{client.email}</TableCell>
+                <TableCell className="py-1 text-sm">{client.gender || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">{client.age || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">{client.phone || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">{client.advisor_name || "-"}</TableCell>
+                <TableCell className="py-1 text-sm">
                   {client.mortgage_amount 
                     ? `€${client.mortgage_amount.toLocaleString('nl-NL')}` 
                     : "-"
