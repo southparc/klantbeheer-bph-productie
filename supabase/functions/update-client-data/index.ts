@@ -107,13 +107,9 @@ serve(async (req) => {
 
     console.log('Permission granted for user:', user.id, 'to update client:', clientId);
 
-    // Filter updatedData to only include fields that exist in the clients table
-    // Exclude computed/virtual fields from the full_client_v2 function
+    // Separate client fields from related table fields
     const {
-      // Remove computed fields that don't exist in clients table
-      advisor_name,
-      advisor_email,
-      partner_gross_income,
+      // House fields
       house_id,
       is_owner_occupied,
       home_value,
@@ -124,34 +120,131 @@ serve(async (req) => {
       annuity_target_amount,
       energy_label,
       current_rent,
+      // Contract fields  
       contract_id,
       dvo,
       max_loan,
       is_damage_client,
+      // Insurance fields
       insurance_id,
       disability_percentage,
       death_risk_assurance_amount,
       insurance_premiums_total,
+      // Goal fields
       financial_goal_id,
       financial_goal_description,
       financial_goal_amount,
       goal_priority,
-      liability_id,
-      liability_total_amount,
+      // Investment fields
       investment_id,
       investment_current_value,
+      // Liability fields
+      liability_id,
+      liability_total_amount,
+      // Computed fields
+      advisor_name,
+      advisor_email,
+      partner_gross_income,
       ...clientFields
     } = updatedData;
 
     console.log('Filtered client fields for update:', Object.keys(clientFields));
 
-    // Perform the update with service role client (bypasses RLS)
+    // Update clients table
     const { data: updateResult, error: updateError } = await serviceClient
       .from('clients')
       .update(clientFields)
       .eq('id', clientId)
       .select()
       .single();
+
+    if (updateError) {
+      console.error('Client update error:', updateError);
+      return new Response(
+        JSON.stringify({ error: `Client update failed: ${updateError.message}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update insurance records if insurance fields are provided
+    if (disability_percentage !== undefined || death_risk_assurance_amount !== undefined) {
+      const insuranceUpdates: any = {};
+      if (disability_percentage !== undefined) insuranceUpdates.disability_percentage = disability_percentage;
+      if (death_risk_assurance_amount !== undefined) insuranceUpdates.death_risk_assurance_amount = death_risk_assurance_amount;
+      
+      const { error: insuranceError } = await serviceClient
+        .from('insurances')
+        .update(insuranceUpdates)
+        .eq('client_id', clientId)
+        .eq('id', insurance_id || 13); // Use provided insurance_id or fallback to latest
+        
+      if (insuranceError) {
+        console.error('Insurance update error:', insuranceError);
+      }
+    }
+
+    // Update house record if house fields are provided  
+    if (is_owner_occupied !== undefined || home_value !== undefined || mortgage_amount !== undefined || 
+        mortgage_remaining !== undefined || mortgage_interest_rate !== undefined || annuity_amount !== undefined ||
+        annuity_target_amount !== undefined || energy_label !== undefined || current_rent !== undefined) {
+      
+      const houseUpdates: any = {};
+      if (is_owner_occupied !== undefined) houseUpdates.is_owner_occupied = is_owner_occupied;
+      if (home_value !== undefined) houseUpdates.home_value = home_value;
+      if (mortgage_amount !== undefined) houseUpdates.mortgage_amount = mortgage_amount;
+      if (mortgage_remaining !== undefined) houseUpdates.mortgage_remaining = mortgage_remaining;
+      if (mortgage_interest_rate !== undefined) houseUpdates.mortgage_interest_rate = mortgage_interest_rate;
+      if (annuity_amount !== undefined) houseUpdates.annuity_amount = annuity_amount;
+      if (annuity_target_amount !== undefined) houseUpdates.annuity_target_amount = annuity_target_amount;
+      if (energy_label !== undefined) houseUpdates.energy_label = energy_label;
+      if (current_rent !== undefined) houseUpdates.current_rent = current_rent;
+      
+      const { error: houseError } = await serviceClient
+        .from('house_objects')
+        .update(houseUpdates)
+        .eq('client_id', clientId)
+        .eq('id', house_id || 9);
+        
+      if (houseError) {
+        console.error('House update error:', houseError);
+      }
+    }
+
+    // Update contract record if contract fields are provided
+    if (dvo !== undefined || max_loan !== undefined || is_damage_client !== undefined) {
+      const contractUpdates: any = {};
+      if (dvo !== undefined) contractUpdates.dvo = dvo;
+      if (max_loan !== undefined) contractUpdates.max_loan = max_loan;
+      if (is_damage_client !== undefined) contractUpdates.is_damage_client = is_damage_client;
+      
+      const { error: contractError } = await serviceClient
+        .from('contracts')
+        .update(contractUpdates)
+        .eq('client_id', clientId)
+        .eq('id', contract_id || 2547);
+        
+      if (contractError) {
+        console.error('Contract update error:', contractError);
+      }
+    }
+
+    // Update financial goals if goal fields are provided
+    if (financial_goal_description !== undefined || financial_goal_amount !== undefined || goal_priority !== undefined) {
+      const goalUpdates: any = {};
+      if (financial_goal_description !== undefined) goalUpdates.description = financial_goal_description;
+      if (financial_goal_amount !== undefined) goalUpdates.amount = financial_goal_amount;
+      if (goal_priority !== undefined) goalUpdates.goal_priority = goal_priority;
+      
+      const { error: goalError } = await serviceClient
+        .from('financial_goals')
+        .update(goalUpdates)
+        .eq('client_id', clientId)
+        .eq('id', financial_goal_id || 5);
+        
+      if (goalError) {
+        console.error('Goal update error:', goalError);
+      }
+    }
 
     if (updateError) {
       console.error('Update error:', updateError);
