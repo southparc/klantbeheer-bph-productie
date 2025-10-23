@@ -66,18 +66,6 @@ serve(async (req) => {
 
     console.log('Authenticated user:', user.id, user.email);
 
-    // Create service role client for elevated database access
-    const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
-    if (!serviceRoleKey) {
-      console.error('SERVICE_ROLE_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Server configuration error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-
     // Check if user has permission to update this client
     // Check if user is an admin by looking at admin_users table
     const { data: adminUser, error: adminError } = await serviceClient
