@@ -51,6 +51,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           updated_at: string
+          VoAdvisor: string | null
         }
         Insert: {
           created_at?: string
@@ -61,6 +62,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           updated_at?: string
+          VoAdvisor?: string | null
         }
         Update: {
           created_at?: string
@@ -71,6 +73,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           updated_at?: string
+          VoAdvisor?: string | null
         }
         Relationships: []
       }
@@ -137,7 +140,7 @@ export type Database = {
           admin_user_id: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           params_hash: string | null
           resource: string
           result_status: number
@@ -149,7 +152,7 @@ export type Database = {
           admin_user_id: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           params_hash?: string | null
           resource: string
           result_status: number
@@ -161,7 +164,7 @@ export type Database = {
           admin_user_id?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           params_hash?: string | null
           resource?: string
           result_status?: number
@@ -194,13 +197,6 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "client_group_mappings_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "mailerlite_groups"
-            referencedColumns: ["id"]
-          },
         ]
       }
       clients: {
@@ -228,6 +224,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           mailerlite_id: string | null
+          marketing_status: string | null
           monthly_fixed_costs: number | null
           monthly_variable_costs: number | null
           net_monthly_income: number | null
@@ -241,6 +238,7 @@ export type Database = {
           retirement_target_age: number | null
           risk_profile: string | null
           saving_balance: number | null
+          subscription_status: string | null
           supabase_auth_id: string | null
           updated_at: string
           zip: string | null
@@ -269,6 +267,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           mailerlite_id?: string | null
+          marketing_status?: string | null
           monthly_fixed_costs?: number | null
           monthly_variable_costs?: number | null
           net_monthly_income?: number | null
@@ -282,6 +281,7 @@ export type Database = {
           retirement_target_age?: number | null
           risk_profile?: string | null
           saving_balance?: number | null
+          subscription_status?: string | null
           supabase_auth_id?: string | null
           updated_at?: string
           zip?: string | null
@@ -310,6 +310,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           mailerlite_id?: string | null
+          marketing_status?: string | null
           monthly_fixed_costs?: number | null
           monthly_variable_costs?: number | null
           net_monthly_income?: number | null
@@ -323,6 +324,7 @@ export type Database = {
           retirement_target_age?: number | null
           risk_profile?: string | null
           saving_balance?: number | null
+          subscription_status?: string | null
           supabase_auth_id?: string | null
           updated_at?: string
           zip?: string | null
@@ -333,13 +335,6 @@ export type Database = {
             columns: ["advisor_id"]
             isOneToOne: false
             referencedRelation: "advisors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clients_mailerlite_id_fkey"
-            columns: ["mailerlite_id"]
-            isOneToOne: false
-            referencedRelation: "mailerlite_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -573,6 +568,73 @@ export type Database = {
           },
         ]
       }
+      integration_crosswalk: {
+        Row: {
+          a_id: string | null
+          b_id: string | null
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          a_id?: string | null
+          b_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          a_id?: string | null
+          b_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_crosswalk_client"
+            columns: ["a_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_crosswalk_groups: {
+        Row: {
+          a_group_id: number
+          b_group_id: string | null
+          created_at: string
+          email: string
+          updated_at: string
+        }
+        Insert: {
+          a_group_id: number
+          b_group_id?: string | null
+          created_at?: string
+          email: string
+          updated_at?: string
+        }
+        Update: {
+          a_group_id?: number
+          b_group_id?: string | null
+          created_at?: string
+          email?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_crosswalk_groups_a_group_id_fkey"
+            columns: ["a_group_id"]
+            isOneToOne: false
+            referencedRelation: "mailerlite_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       investments: {
         Row: {
           client_id: string
@@ -652,41 +714,47 @@ export type Database = {
       mailerlite_groups: {
         Row: {
           created_at: string
-          group_name: string | null
           id: number
-        }
-        Insert: {
-          created_at?: string
-          group_name?: string | null
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          group_name?: string | null
-          id?: number
-        }
-        Relationships: []
-      }
-      mailerlite_profiles: {
-        Row: {
-          created_at: string
-          emails_clicked: number | null
-          emails_sent: number | null
-          id: string
+          ml_group_id: string | null
+          name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          emails_clicked?: number | null
-          emails_sent?: number | null
-          id?: string
+          id?: number
+          ml_group_id?: string | null
+          name: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          emails_clicked?: number | null
-          emails_sent?: number | null
-          id?: string
+          id?: number
+          ml_group_id?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      managed_mailerlite_groups: {
+        Row: {
+          created_at: string
+          group_name: string
+          id: number
+          ml_group_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          group_name: string
+          id?: number
+          ml_group_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          group_name?: string
+          id?: number
+          ml_group_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -792,6 +860,198 @@ export type Database = {
           },
         ]
       }
+      sync_conflicts: {
+        Row: {
+          a_value: string | null
+          b_value: string | null
+          created_at: string
+          detected_at: string
+          email: string
+          field: string
+          id: string
+          resolved_at: string | null
+          resolved_value: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          a_value?: string | null
+          b_value?: string | null
+          created_at?: string
+          detected_at?: string
+          email: string
+          field: string
+          id?: string
+          resolved_at?: string | null
+          resolved_value?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          a_value?: string | null
+          b_value?: string | null
+          created_at?: string
+          detected_at?: string
+          email?: string
+          field?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_value?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sync_log: {
+        Row: {
+          action: string
+          created_at: string
+          dedupe_key: string | null
+          direction: string
+          email: string
+          error_type: string | null
+          field: string | null
+          id: string
+          new_value: string | null
+          old_value: string | null
+          result: string
+          status_code: number | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          dedupe_key?: string | null
+          direction: string
+          email: string
+          error_type?: string | null
+          field?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          result: string
+          status_code?: number | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          dedupe_key?: string | null
+          direction?: string
+          email?: string
+          error_type?: string | null
+          field?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          result?: string
+          status_code?: number | null
+        }
+        Relationships: []
+      }
+      sync_runs: {
+        Row: {
+          completed_at: string | null
+          conflicts_detected: number | null
+          created_at: string
+          dry_run: boolean
+          emails_processed: number | null
+          error_details: Json | null
+          errors_count: number | null
+          id: string
+          mode: string
+          records_created: number | null
+          records_skipped: number | null
+          records_updated: number | null
+          started_at: string
+          status: string
+          summary: Json | null
+        }
+        Insert: {
+          completed_at?: string | null
+          conflicts_detected?: number | null
+          created_at?: string
+          dry_run?: boolean
+          emails_processed?: number | null
+          error_details?: Json | null
+          errors_count?: number | null
+          id?: string
+          mode: string
+          records_created?: number | null
+          records_skipped?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status?: string
+          summary?: Json | null
+        }
+        Update: {
+          completed_at?: string | null
+          conflicts_detected?: number | null
+          created_at?: string
+          dry_run?: boolean
+          emails_processed?: number | null
+          error_details?: Json | null
+          errors_count?: number | null
+          id?: string
+          mode?: string
+          records_created?: number | null
+          records_skipped?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status?: string
+          summary?: Json | null
+        }
+        Relationships: []
+      }
+      sync_shadow: {
+        Row: {
+          created_at: string
+          data_quality: Json | null
+          email: string
+          id: string
+          last_validated_at: string | null
+          snapshot: Json
+          updated_at: string
+          validation_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_quality?: Json | null
+          email: string
+          id?: string
+          last_validated_at?: string | null
+          snapshot?: Json
+          updated_at?: string
+          validation_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_quality?: Json | null
+          email?: string
+          id?: string
+          last_validated_at?: string | null
+          snapshot?: Json
+          updated_at?: string
+          validation_status?: string | null
+        }
+        Relationships: []
+      }
+      sync_state: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       tax_parameters: {
         Row: {
           code: string
@@ -846,30 +1106,102 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      v_tax_parameters_current: {
+      v_clients_for_ml: {
         Row: {
-          code: string | null
+          city: string | null
           country: string | null
-          currency: string | null
-          id: string | null
-          name: string | null
-          regime: string | null
-          source_ref: string | null
-          source_url: string | null
-          status: string | null
-          unit: string | null
-          updated_at: string | null
-          valid_from: string | null
-          valid_to: string | null
-          value_numeric: number | null
-          value_text: string | null
+          email: string | null
+          first_name: string | null
+          groups: string[] | null
+          last_name: string | null
+          phone: string | null
+        }
+        Insert: {
+          city?: never
+          country?: never
+          email?: string | null
+          first_name?: never
+          groups?: never
+          last_name?: never
+          phone?: never
+        }
+        Update: {
+          city?: never
+          country?: never
+          email?: string | null
+          first_name?: never
+          groups?: never
+          last_name?: never
+          phone?: never
+        }
+        Relationships: []
+      }
+      v_clients_for_ml_secure: {
+        Row: {
+          city: string | null
+          country: string | null
+          email: string | null
+          first_name: string | null
+          groups: string[] | null
+          last_name: string | null
+          phone: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          email?: string | null
+          first_name?: string | null
+          groups?: never
+          last_name?: string | null
+          phone?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          email?: string | null
+          first_name?: string | null
+          groups?: never
+          last_name?: string | null
+          phone?: string | null
         }
         Relationships: []
       }
     }
     Functions: {
+      check_duplicate_advisors: {
+        Args: never
+        Returns: {
+          count: number
+          ids: string
+          name: string
+        }[]
+      }
       full_client: {
         Args: { email: string }
         Returns: {
@@ -990,22 +1322,16 @@ export type Database = {
           supabase_auth_id: string
         }[]
       }
-      get_user_id_by_email: {
-        Args: { user_email: string }
-        Returns: string
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
-      link_client_auth_id: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      safe_to_float: {
-        Args: { val: string }
-        Returns: number
-      }
-      safe_to_int: {
-        Args: { val: string }
-        Returns: number
-      }
+      link_client_auth_id: { Args: never; Returns: undefined }
+      safe_to_float: { Args: { val: string }; Returns: number }
+      safe_to_int: { Args: { val: string }; Returns: number }
       sync_figlo_client: {
         Args: {
           p_client: Json
@@ -1032,10 +1358,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      upsert_tax_parameter: {
-        Args: { p: Json }
-        Returns: undefined
-      }
+      upsert_tax_parameter: { Args: { p: Json }; Returns: undefined }
       v_tax_parameters_on: {
         Args: { peildatum: string }
         Returns: {
@@ -1055,10 +1378,16 @@ export type Database = {
           value_numeric: number | null
           value_text: string | null
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "tax_parameters"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1185,6 +1514,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
