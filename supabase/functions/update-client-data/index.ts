@@ -1,11 +1,90 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const updateClientSchema = z.object({
+  clientId: z.string().uuid(),
+  updatedData: z.object({
+    // Client fields
+    first_name: z.string().max(100).optional(),
+    last_name: z.string().max(100).optional(),
+    email: z.string().email().max(255).optional(),
+    phone: z.string().max(50).optional(),
+    company: z.string().max(200).optional(),
+    city: z.string().max(100).optional(),
+    country: z.string().max(100).optional(),
+    zip: z.string().max(20).optional(),
+    prefix: z.string().max(20).optional(),
+    initials: z.string().max(20).optional(),
+    gender: z.enum(['male', 'female', 'other', 'M', 'F', 'O', '']).optional().nullable(),
+    birth_date: z.string().max(50).optional().nullable(),
+    age: z.number().int().min(0).max(150).optional().nullable(),
+    employment_type: z.string().max(100).optional().nullable(),
+    risk_profile: z.string().max(100).optional().nullable(),
+    planning_status: z.string().max(100).optional().nullable(),
+    gross_income: z.number().min(0).optional().nullable(),
+    net_monthly_income: z.number().optional().nullable(),
+    net_monthly_spending: z.number().optional().nullable(),
+    monthly_fixed_costs: z.number().optional().nullable(),
+    monthly_variable_costs: z.number().optional().nullable(),
+    pension_income: z.number().optional().nullable(),
+    saving_balance: z.number().optional().nullable(),
+    investment_balance: z.number().optional().nullable(),
+    consumer_credit_amount: z.number().optional().nullable(),
+    retirement_target_age: z.number().int().min(0).max(150).optional().nullable(),
+    advisor_id: z.number().int().optional().nullable(),
+    
+    // House fields
+    house_id: z.number().int().optional(),
+    is_owner_occupied: z.boolean().optional(),
+    home_value: z.number().min(0).optional().nullable(),
+    mortgage_amount: z.number().min(0).optional().nullable(),
+    mortgage_remaining: z.number().min(0).optional().nullable(),
+    mortgage_interest_rate: z.number().min(0).max(100).optional().nullable(),
+    annuity_amount: z.number().optional().nullable(),
+    annuity_target_amount: z.number().optional().nullable(),
+    energy_label: z.string().max(10).optional().nullable(),
+    current_rent: z.number().min(0).optional().nullable(),
+    
+    // Contract fields
+    contract_id: z.number().int().optional(),
+    dvo: z.number().optional().nullable(),
+    max_loan: z.number().optional().nullable(),
+    is_damage_client: z.boolean().optional(),
+    
+    // Insurance fields
+    insurance_id: z.number().int().optional(),
+    disability_percentage: z.number().min(0).max(100).optional().nullable(),
+    death_risk_assurance_amount: z.number().min(0).optional().nullable(),
+    insurance_premiums_total: z.number().optional().nullable(),
+    
+    // Goal fields
+    financial_goal_id: z.number().int().optional(),
+    financial_goal_description: z.string().max(500).optional().nullable(),
+    financial_goal_amount: z.number().optional().nullable(),
+    goal_priority: z.string().max(50).optional().nullable(),
+    
+    // Investment fields
+    investment_id: z.number().int().optional(),
+    investment_current_value: z.number().optional().nullable(),
+    
+    // Liability fields
+    liability_id: z.number().int().optional(),
+    liability_total_amount: z.number().optional().nullable(),
+    
+    // Computed/readonly fields (ignored but allowed in input)
+    advisor_name: z.string().optional(),
+    advisor_email: z.string().optional(),
+    partner_gross_income: z.number().optional().nullable(),
+  }).passthrough(), // Allow extra fields but they'll be filtered
+});
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -14,14 +93,25 @@ serve(async (req) => {
   }
 
   try {
-    const { clientId, updatedData } = await req.json();
+    const requestBody = await req.json();
 
-    if (!clientId || !updatedData) {
+    // Validate input with zod
+    const parseResult = updateClientSchema.safeParse(requestBody);
+    if (!parseResult.success) {
+      console.error('Validation error:', parseResult.error.errors);
       return new Response(
-        JSON.stringify({ error: 'Missing clientId or updatedData' }),
+        JSON.stringify({ 
+          error: 'Invalid input data', 
+          details: parseResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const { clientId, updatedData } = parseResult.data;
 
     // Get the authorization header to verify the user
     const authHeader = req.headers.get('Authorization');
@@ -170,7 +260,7 @@ serve(async (req) => {
 
     // Update insurance records if insurance fields are provided
     if (disability_percentage !== undefined || death_risk_assurance_amount !== undefined) {
-      const insuranceUpdates: any = {};
+      const insuranceUpdates: Record<string, unknown> = {};
       if (disability_percentage !== undefined) insuranceUpdates.disability_percentage = disability_percentage;
       if (death_risk_assurance_amount !== undefined) insuranceUpdates.death_risk_assurance_amount = death_risk_assurance_amount;
       
@@ -178,7 +268,7 @@ serve(async (req) => {
         .from('insurances')
         .update(insuranceUpdates)
         .eq('client_id', clientId)
-        .eq('id', insurance_id || 13); // Use provided insurance_id or fallback to latest
+        .eq('id', insurance_id || 13);
         
       if (insuranceError) {
         console.error('Insurance update error:', insuranceError);
@@ -190,7 +280,7 @@ serve(async (req) => {
         mortgage_remaining !== undefined || mortgage_interest_rate !== undefined || annuity_amount !== undefined ||
         annuity_target_amount !== undefined || energy_label !== undefined || current_rent !== undefined) {
       
-      const houseUpdates: any = {};
+      const houseUpdates: Record<string, unknown> = {};
       if (is_owner_occupied !== undefined) houseUpdates.is_owner_occupied = is_owner_occupied;
       if (home_value !== undefined) houseUpdates.home_value = home_value;
       if (mortgage_amount !== undefined) houseUpdates.mortgage_amount = mortgage_amount;
@@ -214,7 +304,7 @@ serve(async (req) => {
 
     // Update contract record if contract fields are provided
     if (dvo !== undefined || max_loan !== undefined || is_damage_client !== undefined) {
-      const contractUpdates: any = {};
+      const contractUpdates: Record<string, unknown> = {};
       if (dvo !== undefined) contractUpdates.dvo = dvo;
       if (max_loan !== undefined) contractUpdates.max_loan = max_loan;
       if (is_damage_client !== undefined) contractUpdates.is_damage_client = is_damage_client;
@@ -232,7 +322,7 @@ serve(async (req) => {
 
     // Update financial goals if goal fields are provided
     if (financial_goal_description !== undefined || financial_goal_amount !== undefined || goal_priority !== undefined) {
-      const goalUpdates: any = {};
+      const goalUpdates: Record<string, unknown> = {};
       if (financial_goal_description !== undefined) goalUpdates.description = financial_goal_description;
       if (financial_goal_amount !== undefined) goalUpdates.amount = financial_goal_amount;
       if (goal_priority !== undefined) goalUpdates.goal_priority = goal_priority;
@@ -246,14 +336,6 @@ serve(async (req) => {
       if (goalError) {
         console.error('Goal update error:', goalError);
       }
-    }
-
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return new Response(
-        JSON.stringify({ error: `Update failed: ${updateError.message}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     console.log('Successfully updated client:', clientId);
