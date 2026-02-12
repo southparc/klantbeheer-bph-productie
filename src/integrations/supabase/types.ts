@@ -48,6 +48,7 @@ export type Database = {
           email: string | null
           id: number
           name: string | null
+          office_id: number | null
           phone: string | null
           photo_url: string | null
           updated_at: string
@@ -59,6 +60,7 @@ export type Database = {
           email?: string | null
           id?: number
           name?: string | null
+          office_id?: number | null
           phone?: string | null
           photo_url?: string | null
           updated_at?: string
@@ -70,12 +72,21 @@ export type Database = {
           email?: string | null
           id?: number
           name?: string | null
+          office_id?: number | null
           phone?: string | null
           photo_url?: string | null
           updated_at?: string
           VoAdvisor?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "advisors_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       appointments: {
         Row: {
@@ -172,6 +183,50 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: []
+      }
+      dashboard_users: {
+        Row: {
+          id: string
+          auth_id: string
+          email: string
+          name: string
+          role: Database["public"]["Enums"]["dashboard_role"]
+          office_id: number | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          auth_id: string
+          email: string
+          name: string
+          role?: Database["public"]["Enums"]["dashboard_role"]
+          office_id?: number | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          auth_id?: string
+          email?: string
+          name?: string
+          role?: Database["public"]["Enums"]["dashboard_role"]
+          office_id?: number | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_users_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -681,6 +736,33 @@ export type Database = {
           },
         ]
       }
+      offices: {
+        Row: {
+          id: number
+          name: string
+          city: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          name: string
+          city?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          city?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news_items: {
         Row: {
           auto_approved: boolean
@@ -1039,6 +1121,17 @@ export type Database = {
           supabase_auth_id: string
         }[]
       }
+      get_dashboard_user: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          email: string
+          name: string
+          role: Database["public"]["Enums"]["dashboard_role"]
+          office_id: number | null
+          office_name: string | null
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1105,6 +1198,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      dashboard_role: "super_admin" | "office_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1233,6 +1327,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      dashboard_role: ["super_admin", "office_admin"],
     },
   },
 } as const

@@ -51,7 +51,11 @@ interface Client {
 
 const ITEMS_PER_PAGE = 100;
 
-export function ClientsTable() {
+interface ClientsTableProps {
+  officeId?: number | null;
+}
+
+export function ClientsTable({ officeId }: ClientsTableProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -75,9 +79,21 @@ export function ClientsTable() {
   }, [searchTerm]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["clients", currentPage, sortField, sortDirection, debouncedSearch],
+    queryKey: ["clients", currentPage, sortField, sortDirection, debouncedSearch, officeId],
     queryFn: async () => {
-      console.log("Query with search term:", debouncedSearch);
+      console.log("Query with search term:", debouncedSearch, "officeId:", officeId);
+
+      // If office_admin, first get advisor IDs for this office
+      let advisorIds: number[] | null = null;
+      if (officeId) {
+        const { data: advisors, error: advError } = await supabase
+          .from("advisors")
+          .select("id")
+          .eq("office_id", officeId);
+        if (advError) throw advError;
+        advisorIds = advisors?.map((a) => a.id) || [];
+      }
+
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
@@ -95,6 +111,15 @@ export function ClientsTable() {
           house_objects(mortgage_amount)
         `)
         .range(from, to);
+
+      // Office scoping: only show clients of advisors in this office
+      if (advisorIds !== null) {
+        if (advisorIds.length === 0) {
+          // No advisors in this office = no clients to show
+          return { clients: [], total: 0 };
+        }
+        query = query.in("advisor_id", advisorIds);
+      }
 
       if (debouncedSearch && debouncedSearch.length >= 2) {
         console.log("Applying search filter:", debouncedSearch);
