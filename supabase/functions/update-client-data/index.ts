@@ -183,13 +183,8 @@ serve(async (req) => {
 
     // Check if user has permission to update this client
     const isClientOwner = clientData.supabase_auth_id === user.id;
-    const isAssignedAdvisor = clientData.advisor_id && (await serviceClient
-      .from('advisors')
-      .select('user_id')
-      .eq('id', clientData.advisor_id)
-      .single()).data?.user_id === user.id;
 
-    if (!isAdmin && !isClientOwner && !isAssignedAdvisor) {
+    if (!isAdmin && !isClientOwner) {
       console.log('Permission denied for user:', user.id, 'on client:', clientId);
       return new Response(
         JSON.stringify({ error: 'Permission denied: You are not authorized to update this client' }),
@@ -258,28 +253,62 @@ serve(async (req) => {
       );
     }
 
+    // --- Upsert helper: update existing record or insert new one ---
+    async function upsertChild(
+      table: string,
+      clientId: string,
+      updates: Record<string, unknown>,
+      existingId?: number,
+      extraFilter?: { column: string; value: unknown }
+    ) {
+      if (existingId) {
+        const { error } = await serviceClient
+          .from(table)
+          .update(updates)
+          .eq('id', existingId);
+        if (error) console.error(`${table} update error:`, error);
+      } else {
+        let query = serviceClient.from(table).select('id').eq('client_id', clientId);
+        if (extraFilter) query = query.eq(extraFilter.column, extraFilter.value);
+        const { data: existing } = await query.limit(1);
+
+        if (existing && existing.length > 0) {
+          const { error } = await serviceClient
+            .from(table)
+            .update(updates)
+            .eq('id', existing[0].id);
+          if (error) console.error(`${table} update error:`, error);
+        } else {
+          const { error } = await serviceClient
+            .from(table)
+            .insert({ client_id: clientId, ...updates });
+          if (error) console.error(`${table} insert error:`, error);
+        }
+      }
+    }
+
     // Update insurance records if insurance fields are provided
     if (disability_percentage !== undefined || death_risk_assurance_amount !== undefined) {
       const insuranceUpdates: Record<string, unknown> = {};
       if (disability_percentage !== undefined) insuranceUpdates.disability_percentage = disability_percentage;
       if (death_risk_assurance_amount !== undefined) insuranceUpdates.death_risk_assurance_amount = death_risk_assurance_amount;
-      
-      const { error: insuranceError } = await serviceClient
-        .from('insurances')
-        .update(insuranceUpdates)
-        .eq('client_id', clientId)
-        .eq('id', insurance_id || 13);
-        
-      if (insuranceError) {
-        console.error('Insurance update error:', insuranceError);
-      }
+      await upsertChild('insurances', clientId, insuranceUpdates, insurance_id);
     }
 
-    // Update house record if house fields are provided  
-    if (is_owner_occupied !== undefined || home_value !== undefined || mortgage_amount !== undefined || 
+    // Update insurance premiums (separate record with type=total_premiums)
+    if (insurance_premiums_total !== undefined) {
+      await upsertChild('insurances', clientId,
+        { value: insurance_premiums_total, type: 'total_premiums', display_name: 'Totaal premies' },
+        undefined,
+        { column: 'type', value: 'total_premiums' }
+      );
+    }
+
+    // Update house record if house fields are provided
+    if (is_owner_occupied !== undefined || home_value !== undefined || mortgage_amount !== undefined ||
         mortgage_remaining !== undefined || mortgage_interest_rate !== undefined || annuity_amount !== undefined ||
         annuity_target_amount !== undefined || energy_label !== undefined || current_rent !== undefined) {
-      
+
       const houseUpdates: Record<string, unknown> = {};
       if (is_owner_occupied !== undefined) houseUpdates.is_owner_occupied = is_owner_occupied;
       if (home_value !== undefined) houseUpdates.home_value = home_value;
@@ -290,16 +319,7 @@ serve(async (req) => {
       if (annuity_target_amount !== undefined) houseUpdates.annuity_target_amount = annuity_target_amount;
       if (energy_label !== undefined) houseUpdates.energy_label = energy_label;
       if (current_rent !== undefined) houseUpdates.current_rent = current_rent;
-      
-      const { error: houseError } = await serviceClient
-        .from('house_objects')
-        .update(houseUpdates)
-        .eq('client_id', clientId)
-        .eq('id', house_id || 9);
-        
-      if (houseError) {
-        console.error('House update error:', houseError);
-      }
+      await upsertChild('house_objects', clientId, houseUpdates, house_id);
     }
 
     // Update contract record if contract fields are provided
@@ -308,16 +328,7 @@ serve(async (req) => {
       if (dvo !== undefined) contractUpdates.dvo = dvo;
       if (max_loan !== undefined) contractUpdates.max_loan = max_loan;
       if (is_damage_client !== undefined) contractUpdates.is_damage_client = is_damage_client;
-      
-      const { error: contractError } = await serviceClient
-        .from('contracts')
-        .update(contractUpdates)
-        .eq('client_id', clientId)
-        .eq('id', contract_id || 2547);
-        
-      if (contractError) {
-        console.error('Contract update error:', contractError);
-      }
+      await upsertChild('contracts', clientId, contractUpdates, contract_id);
     }
 
     // Update financial goals if goal fields are provided
@@ -326,16 +337,7 @@ serve(async (req) => {
       if (financial_goal_description !== undefined) goalUpdates.description = financial_goal_description;
       if (financial_goal_amount !== undefined) goalUpdates.amount = financial_goal_amount;
       if (goal_priority !== undefined) goalUpdates.goal_priority = goal_priority;
-      
-      const { error: goalError } = await serviceClient
-        .from('financial_goals')
-        .update(goalUpdates)
-        .eq('client_id', clientId)
-        .eq('id', financial_goal_id || 5);
-        
-      if (goalError) {
-        console.error('Goal update error:', goalError);
-      }
+      await upsertChild('financial_goals', clientId, goalUpdates, financial_goal_id);
     }
 
     console.log('Successfully updated client:', clientId);

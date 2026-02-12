@@ -28,21 +28,21 @@ export const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
       if (error) {
         toast({
           variant: "destructive",
-          title: "Login Failed",
+          title: "Login mislukt",
           description: error.message,
         });
       } else {
         toast({
-          title: "Login Successful",
-          description: "Welcome back!",
+          title: "Ingelogd",
+          description: "Welkom terug!",
         });
         onLoginSuccess();
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred",
+        title: "Fout",
+        description: "Er is een onverwachte fout opgetreden",
       });
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         <CardHeader>
           <CardTitle>Admin Login</CardTitle>
           <CardDescription>
-            Sign in to access the client management system
+            Log in om het klantbeheersysteem te openen
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,7 +79,7 @@ export const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Inloggen..." : "Inloggen"}
             </Button>
           </form>
         </CardContent>

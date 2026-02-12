@@ -77,7 +77,8 @@ export default function AddClient() {
         country: formData.country || null,
         risk_profile: formData.risk_profile || null,
         gross_income: formData.gross_income ? parseFloat(formData.gross_income) : null,
-        supabase_auth_id: user.id,
+        // supabase_auth_id is NOT set here — it gets linked when the client
+        // first logs into the FinnApp via link_client_auth_id RPC.
       };
 
       const { data, error } = await supabase
