@@ -97,49 +97,36 @@ export default function AdminUsers() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      // First, look up the auth user by email
-      // We need the auth_id — the user must already have a Supabase Auth account
-      const { data: authUsers, error: lookupError } = await supabase.rpc('get_auth_user_by_email' as any, {
-        p_email: formData.email,
+      // Look up auth.users ID by email via SECURITY DEFINER RPC
+      const { data: authId, error: lookupError } = await supabase.rpc('get_auth_id_by_email' as any, {
+        p_email: formData.email.trim().toLowerCase(),
       });
 
-      // If RPC doesn't exist, try inserting with a placeholder and let the user know
-      // For now, we'll create the dashboard_user entry
-      // The admin will need to ensure the user has a Supabase Auth account first
+      if (lookupError) {
+        throw new Error("Kon auth gebruiker niet opzoeken: " + lookupError.message);
+      }
 
-      // Try to find existing auth user via admin_users or by email match
-      const { data: existingAdmin } = await supabase
-        .from("admin_users")
-        .select("id, email")
-        .eq("email", formData.email)
-        .maybeSingle();
-
-      let authId: string;
-
-      if (existingAdmin) {
-        authId = existingAdmin.id;
-      } else {
-        // Create a new auth user via signUp (they'll get an email)
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: crypto.randomUUID(), // Random password, user will reset
-        });
-
-        if (signUpError || !signUpData.user) {
-          throw new Error(signUpError?.message || "Kon geen account aanmaken");
-        }
-        authId = signUpData.user.id;
+      if (!authId) {
+        throw new Error(
+          `Geen Supabase Auth account gevonden voor ${formData.email}. ` +
+          `De gebruiker moet eerst een account aanmaken via de app of het dashboard login scherm.`
+        );
       }
 
       const { error } = await supabase.from("dashboard_users").insert({
         auth_id: authId,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         name: formData.name,
         role: formData.role,
         office_id: formData.office_id ? parseInt(formData.office_id) : null,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error("Deze gebruiker bestaat al als dashboard gebruiker.");
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboard_users"] });
