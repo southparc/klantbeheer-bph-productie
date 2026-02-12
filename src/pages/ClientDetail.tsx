@@ -276,9 +276,10 @@ const ClientDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-8">
-          <div className="text-center">Klantgegevens laden...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground text-sm">Klantgegevens laden...</span>
         </div>
       </div>
     );
@@ -286,11 +287,13 @@ const ClientDetail = () => {
 
   if (error || !client) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-8">
-          <div className="text-center text-destructive">
-            Fout bij laden klantgegevens
-          </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-destructive text-sm">Fout bij laden klantgegevens</div>
+          <Button variant="outline" onClick={() => navigate('/')} className="mt-4 rounded-xl">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Terug naar klanten
+          </Button>
         </div>
       </div>
     );
@@ -298,76 +301,87 @@ const ClientDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Terug naar klanten
-            </Button>
-            <h1 className="text-3xl font-bold">
-              {client.first_name} {client.last_name}
-            </h1>
-          </div>
-          <div className="flex gap-2">
-            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Verwijderen
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Klant verwijderen?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Dit verwijdert {client?.first_name} {client?.last_name} en alle gerelateerde data
-                    (woning, verzekeringen, contracten, doelen, etc.). Dit kan niet ongedaan worden gemaakt.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annuleren</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteMutation.mutate()}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {deleteMutation.isPending ? 'Verwijderen...' : 'Definitief verwijderen'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <Button 
-              variant="outline" 
-              onClick={handleReset}
-              disabled={!hasChanges || updateMutation.isPending}
-            >
-              Reset
-            </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={!hasChanges || updateMutation.isPending}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {updateMutation.isPending ? 'Opslaan...' : 'Wijzigingen opslaan'}
-            </Button>
+      {/* Sticky header */}
+      <div className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground h-9 w-9 p-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-lg font-semibold tracking-tight">
+                  {client.first_name} {client.last_name}
+                </h1>
+                <p className="text-xs text-muted-foreground">{client.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive h-9 w-9 p-0">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Klant verwijderen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Dit verwijdert {client?.first_name} {client?.last_name} en alle gerelateerde data
+                      (woning, verzekeringen, contracten, doelen, etc.). Dit kan niet ongedaan worden gemaakt.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Annuleren</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteMutation.mutate()}
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleteMutation.isPending ? 'Verwijderen...' : 'Definitief verwijderen'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <div className="h-6 w-px bg-border" />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleReset}
+                disabled={!hasChanges || updateMutation.isPending}
+                className="rounded-xl h-9 text-sm"
+              >
+                Reset
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!hasChanges || updateMutation.isPending}
+                className="rounded-xl h-9 text-sm bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white shadow-sm shadow-teal-500/20"
+              >
+                <Save className="h-4 w-4 mr-1.5" />
+                {updateMutation.isPending ? 'Opslaan...' : 'Opslaan'}
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
+      {/* Content */}
+      <div className="container mx-auto px-6 py-6">
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="personal">Persoonlijk</TabsTrigger>
-            <TabsTrigger value="financial">Financieel</TabsTrigger>
-            <TabsTrigger value="property">Woning</TabsTrigger>
-            <TabsTrigger value="insurance">Verzekeringen</TabsTrigger>
-            <TabsTrigger value="goals">Doelen</TabsTrigger>
-            <TabsTrigger value="advisor">Adviseur</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 rounded-xl bg-muted/50 p-1 h-auto">
+            <TabsTrigger value="personal" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Persoonlijk</TabsTrigger>
+            <TabsTrigger value="financial" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Financieel</TabsTrigger>
+            <TabsTrigger value="property" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Woning</TabsTrigger>
+            <TabsTrigger value="insurance" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Verzekeringen</TabsTrigger>
+            <TabsTrigger value="goals" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Doelen</TabsTrigger>
+            <TabsTrigger value="advisor" className="rounded-lg text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">Adviseur</TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal">
-            <Card>
-              <CardHeader>
-                <CardTitle>Persoonlijke gegevens</CardTitle>
-                <CardDescription>Basisgegevens en contactinformatie</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Persoonlijke gegevens</CardTitle>
+                <CardDescription className="text-xs">Basisgegevens en contactinformatie</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
@@ -465,10 +479,10 @@ const ClientDetail = () => {
           </TabsContent>
 
           <TabsContent value="financial">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financiële gegevens</CardTitle>
-                <CardDescription>Inkomen, uitgaven en beleggingen</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Financiële gegevens</CardTitle>
+                <CardDescription className="text-xs">Inkomen, uitgaven en beleggingen</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
@@ -575,10 +589,10 @@ const ClientDetail = () => {
           </TabsContent>
 
           <TabsContent value="property">
-            <Card>
-              <CardHeader>
-                <CardTitle>Woninggegevens</CardTitle>
-                <CardDescription>Woning en hypotheek details</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Woninggegevens</CardTitle>
+                <CardDescription className="text-xs">Woning en hypotheek details</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
@@ -707,10 +721,10 @@ const ClientDetail = () => {
           </TabsContent>
 
           <TabsContent value="insurance">
-            <Card>
-              <CardHeader>
-                <CardTitle>Verzekeringen</CardTitle>
-                <CardDescription>Polissen en dekking</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Verzekeringen</CardTitle>
+                <CardDescription className="text-xs">Polissen en dekking</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
@@ -794,10 +808,10 @@ const ClientDetail = () => {
           </TabsContent>
 
           <TabsContent value="goals">
-            <Card>
-              <CardHeader>
-                <CardTitle>Doelen & Beleggingen</CardTitle>
-                <CardDescription>Doelen, beleggingen en schulden</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Doelen & Beleggingen</CardTitle>
+                <CardDescription className="text-xs">Doelen, beleggingen en schulden</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Financial Goals */}
@@ -886,10 +900,10 @@ const ClientDetail = () => {
           </TabsContent>
 
           <TabsContent value="advisor">
-            <Card>
-              <CardHeader>
-                <CardTitle>Adviseur & Partner</CardTitle>
-                <CardDescription>Gekoppelde adviseur en partnergegevens</CardDescription>
+            <Card className="border-0 shadow-sm rounded-2xl mt-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Adviseur & Partner</CardTitle>
+                <CardDescription className="text-xs">Gekoppelde adviseur en partnergegevens</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Advisor Info */}
