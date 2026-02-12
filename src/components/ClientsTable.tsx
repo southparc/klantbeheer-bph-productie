@@ -134,106 +134,119 @@ export function ClientsTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Klanten laden...</div>
+      <div className="flex items-center justify-center py-16">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground text-sm">Klanten laden...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-destructive">Fout bij laden klanten</div>
+      <div className="flex items-center justify-center py-16">
+        <div className="text-destructive text-sm">Fout bij laden klanten</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Klanten ({data?.total || 0})</h2>
-        <div className="relative w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-semibold tracking-tight">Klanten</h2>
+          <span className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700">
+            {data?.total || 0}
+          </span>
+        </div>
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Zoek op naam of email..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
             }}
-            className="pl-8 h-9 text-sm"
+            className="pl-9 h-10 text-sm rounded-xl bg-muted/50 border-0 focus-visible:ring-teal-500"
           />
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="h-10">
-              <TableHead className="h-10 py-2">
+            <TableRow className="h-11 bg-muted/30 hover:bg-muted/30">
+              <TableHead className="h-11 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("first_name")}
-                  className="h-auto p-0 font-medium text-xs"
+                  className="h-auto p-0 font-medium text-xs text-muted-foreground hover:text-foreground"
                 >
                   Voornaam {getSortIcon("first_name")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2">
+              <TableHead className="h-11 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("last_name")}
-                  className="h-auto p-0 font-medium text-xs"
+                  className="h-auto p-0 font-medium text-xs text-muted-foreground hover:text-foreground"
                 >
                   Achternaam {getSortIcon("last_name")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2">
+              <TableHead className="h-11 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("email")}
-                  className="h-auto p-0 font-medium text-xs"
+                  className="h-auto p-0 font-medium text-xs text-muted-foreground hover:text-foreground"
                 >
                   Email {getSortIcon("email")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2">
+              <TableHead className="h-11 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("gender")}
-                  className="h-auto p-0 font-medium text-xs"
+                  className="h-auto p-0 font-medium text-xs text-muted-foreground hover:text-foreground"
                 >
                   Geslacht {getSortIcon("gender")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2">
+              <TableHead className="h-11 py-2">
                 <Button
                   variant="ghost"
                   onClick={() => handleSort("age")}
-                  className="h-auto p-0 font-medium text-xs"
+                  className="h-auto p-0 font-medium text-xs text-muted-foreground hover:text-foreground"
                 >
                   Leeftijd {getSortIcon("age")}
                 </Button>
               </TableHead>
-              <TableHead className="h-10 py-2 text-xs">Telefoon</TableHead>
-              <TableHead className="h-10 py-2 text-xs">Adviseur</TableHead>
-              <TableHead className="h-10 py-2 text-xs">Hypotheek</TableHead>
+              <TableHead className="h-11 py-2 text-xs font-medium text-muted-foreground">Telefoon</TableHead>
+              <TableHead className="h-11 py-2 text-xs font-medium text-muted-foreground">Adviseur</TableHead>
+              <TableHead className="h-11 py-2 text-xs font-medium text-muted-foreground">Hypotheek</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data?.clients.map((client) => (
               <TableRow 
                 key={client.id} 
-                className="cursor-pointer hover:bg-muted/50 h-8"
+                className="cursor-pointer hover:bg-teal-50/50 transition-colors h-10 group"
                 onClick={() => navigate(`/client/${client.id}`)}
               >
-                <TableCell className="py-1 text-sm">{client.first_name || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">{client.last_name || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">{client.email}</TableCell>
-                <TableCell className="py-1 text-sm">{client.gender || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">{client.age || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">{client.phone || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">{client.advisor_name || "-"}</TableCell>
-                <TableCell className="py-1 text-sm">
+                <TableCell className="py-2 text-sm font-medium">{client.first_name || "-"}</TableCell>
+                <TableCell className="py-2 text-sm font-medium">{client.last_name || "-"}</TableCell>
+                <TableCell className="py-2 text-sm text-muted-foreground">{client.email}</TableCell>
+                <TableCell className="py-2 text-sm text-muted-foreground">{client.gender || "-"}</TableCell>
+                <TableCell className="py-2 text-sm text-muted-foreground">{client.age || "-"}</TableCell>
+                <TableCell className="py-2 text-sm text-muted-foreground">{client.phone || "-"}</TableCell>
+                <TableCell className="py-2 text-sm">
+                  {client.advisor_name 
+                    ? <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">{client.advisor_name}</span>
+                    : <span className="text-muted-foreground">-</span>
+                  }
+                </TableCell>
+                <TableCell className="py-2 text-sm tabular-nums text-muted-foreground">
                   {client.mortgage_amount 
                     ? `€${client.mortgage_amount.toLocaleString('nl-NL')}` 
                     : "-"
