@@ -109,7 +109,7 @@ export function ClientsTable({ officeId }: ClientsTableProps) {
           age,
           advisors(name),
           house_objects(mortgage_amount)
-        `)
+        `, { count: 'exact' })
         .range(from, to);
 
       // Office scoping: only show clients of advisors in this office
