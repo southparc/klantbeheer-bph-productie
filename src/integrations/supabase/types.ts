@@ -234,6 +234,7 @@ export type Database = {
           planning_status: string | null
           prefix: string | null
           rank: number | null
+          realEstateInvestments: number | null
           referer: string | null
           retirement_target_age: number | null
           risk_profile: string | null
@@ -277,6 +278,7 @@ export type Database = {
           planning_status?: string | null
           prefix?: string | null
           rank?: number | null
+          realEstateInvestments?: number | null
           referer?: string | null
           retirement_target_age?: number | null
           risk_profile?: string | null
@@ -320,6 +322,7 @@ export type Database = {
           planning_status?: string | null
           prefix?: string | null
           rank?: number | null
+          realEstateInvestments?: number | null
           referer?: string | null
           retirement_target_age?: number | null
           risk_profile?: string | null
@@ -455,6 +458,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      goals: {
+        Row: {
+          accumulation_return_rate: number
+          annual_return_rate: number
+          created_at: string
+          current_amount: number
+          id: string
+          is_active: boolean
+          life_expectancy_age: number
+          monthly_contribution: number
+          monthly_withdrawal: number | null
+          name: string
+          payout_start_age: number | null
+          regime: string
+          sort_order: number
+          target_amount: number
+          target_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accumulation_return_rate?: number
+          annual_return_rate?: number
+          created_at?: string
+          current_amount?: number
+          id?: string
+          is_active?: boolean
+          life_expectancy_age?: number
+          monthly_contribution?: number
+          monthly_withdrawal?: number | null
+          name: string
+          payout_start_age?: number | null
+          regime: string
+          sort_order?: number
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accumulation_return_rate?: number
+          annual_return_rate?: number
+          created_at?: string
+          current_amount?: number
+          id?: string
+          is_active?: boolean
+          life_expectancy_age?: number
+          monthly_contribution?: number
+          monthly_withdrawal?: number | null
+          name?: string
+          payout_start_age?: number | null
+          regime?: string
+          sort_order?: number
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       house_objects: {
         Row: {
@@ -755,6 +818,51 @@ export type Database = {
           group_name?: string
           id?: number
           ml_group_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      news_items: {
+        Row: {
+          auto_approved: boolean
+          category: string
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          published_at: string | null
+          source_url: string | null
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          auto_approved?: boolean
+          category?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          source_url?: string | null
+          status?: string
+          summary: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          auto_approved?: boolean
+          category?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -1202,6 +1310,7 @@ export type Database = {
           name: string
         }[]
       }
+      cleanup_old_news: { Args: never; Returns: undefined }
       full_client: {
         Args: { email: string }
         Returns: {
